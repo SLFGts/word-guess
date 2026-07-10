@@ -28,6 +28,14 @@ Page({
     this.loadRecentGame();
   },
 
+  onReady() {
+    // 字体异步加载完成后，已渲染的页面不会自动重绘
+    // 延迟触发一次 setData 空操作，强制页面用新字体重新渲染
+    setTimeout(() => {
+      this.setData({});
+    }, 800);
+  },
+
   onShow() {
     // 每次显示时刷新最近战绩
     this.loadRecentGame();
