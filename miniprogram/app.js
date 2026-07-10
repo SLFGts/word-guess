@@ -23,15 +23,15 @@ App({
   /** 加载像素字体和圆润中文字体 */
   loadFonts() {
     return new Promise((resolve) => {
-      // 字体文件的 CDN URL（GitHub + jsdelivr）
+      // 使用小程序包内本地路径加载字体（无需外部 CDN）
       const fontFiles = [
         {
           family: 'ZCOOL',
-          url: 'https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2'
+          source: 'url("/assets/fonts/ZCOOLKuaiLe-Regular.woff2")'
         },
         {
           family: 'PressStart',
-          url: 'https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/PressStart2P-Regular.woff2'
+          source: 'url("/assets/fonts/PressStart2P-Regular.woff2")'
         }
       ];
 
@@ -43,18 +43,18 @@ App({
         if (loaded === total) resolve();
       };
 
-      // 加载字体
       fontFiles.forEach(font => {
         wx.loadFontFace({
           family: font.family,
-          source: `url("${font.url}")`,
+          source: font.source,
+          scopes: ['webview', 'native'],
           success: () => {
             console.log(`${font.family} 字体加载成功`);
             onDone();
           },
           fail: (err) => {
             console.warn(`${font.family} 字体加载失败:`, err);
-            onDone();  // 失败也计数，避免阻塞
+            onDone();
           }
         });
       });
