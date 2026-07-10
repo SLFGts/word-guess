@@ -24,16 +24,17 @@ Page({
     ]
   },
 
-  onLoad() {
+  async onLoad() {
+    // 等待字体加载完成再渲染
+    const app = getApp();
+    await app.getFontPromise();
+
     this.loadRecentGame();
   },
 
   onReady() {
-    // 字体异步加载完成后，已渲染的页面不会自动重绘
-    // 延迟触发一次 setData 空操作，强制页面用新字体重新渲染
-    setTimeout(() => {
-      this.setData({});
-    }, 800);
+    // 字体加载完成后强制重绘
+    this.setData({});
   },
 
   onShow() {
