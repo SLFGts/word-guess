@@ -2,19 +2,6 @@
    猜词小程序 — 轻松像素涂鸦风格全局样式
    ==================================== */
 
-/* 加载自定义字体 */
-@font-face {
-  font-family: "ZCOOL";
-  src: url("/assets/fonts/ZCOOLKuaiLe-Regular.woff2");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "PressStart";
-  src: url("/assets/fonts/PressStart2P-Regular.woff2");
-  font-display: swap;
-}
-
 /* CSS 变量定义 */
 page {
   --color-bg: #F5F0E1;          /* 暖米色背景 */
