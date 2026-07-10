@@ -1,51 +1,136 @@
-# 字体部署说明
+# 字体部署说明（最终方案）
 
 ## 当前状态
 
-字体文件已复制到 `miniprogram/assets/fonts/` 目录：
-- `ZCOOLKuaiLe-Regular.woff2` - 圆润中文字体（站酷快乐体）
-- `PressStart2P-Regular.woff2` - 像素英文字体
+✅ 字体已通过 `@font-face` + jsdelivr CDN 成功加载
 
-## 部署步骤
+**字体文件**：
+- `ZCOOLKuaiLe-Regular.woff2` - 圆润中文字体（站酷快乐体，3.1MB）
+- `PressStart2P-Regular.woff2` - 像素英文字体（115KB）
 
-### 方案 A：上传到云存储（推荐）
-
-1. 打开微信开发者工具，进入「云开发」控制台
-2. 点击「存储」标签
-3. 创建 `fonts` 文件夹
-4. 上传两个 woff2 文件
-5. 获取文件的 fileID（格式：`cloud://env-id.xxx/fonts/xxx.woff2`）
-6. 修改 `app.js` 中的 `source` URL 为 fileID：
-
-```javascript
-wx.loadFontFace({
-  family: 'ZCOOL',
-  source: 'url("cloud://your-env-id.xxx/fonts/ZCOOLKuaiLe-Regular.woff2")',
-  // ...
-});
+**CDN 链接**：
+```
+https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2
+https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/PressStart2P-Regular.woff2
 ```
 
-### 方案 B：使用外部 CDN
+---
 
-1. 将字体文件上传到你的 CDN（如阿里云 OSS、腾讯云 COS）
-2. 获取公开访问 URL
-3. 修改 `app.js` 中的 `source` URL
+## 加载方案
 
-### 方案 C：本地加载（测试用）
+### 最终方案：wxss @font-face + HTTPS CDN
 
-小程序不支持直接加载包内字体文件作为 `wx.loadFontFace` 的 source，
-必须使用网络 URL 或云存储 fileID。
+```css
+/* app.wxss */
+@font-face {
+  font-family: "ZCOOL";
+  src: url("https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2");
+}
 
-## 注意事项
+@font-face {
+  font-family: "PressStart";
+  src: url("https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/PressStart2P-Regular.woff2");
+}
+```
 
-- 字体文件较大（约 5-10MB），建议压缩后上传
-- 首次加载需要网络，建议在 `onLaunch` 中预加载
-- 如果加载失败，会自动降级到系统默认字体
-- 真机调试时需要确保网络可达
+**为什么不用 wx.loadFontFace？**
+- ❌ 不支持本地路径（如 `url("/assets/fonts/xxx.woff2")`）
+- ❌ 云存储 CDN 权限问题（`STORAGE_EXCEED_AUTHORITY`）
+- ✅ `@font-face` 支持 HTTPS 链接，小程序自动加载
+
+---
+
+## 字体文件存储
+
+### 方案 1：GitHub + jsdelivr CDN（当前方案）
+
+```
+字体文件位置：miniprogram/assets/fonts/
+                ↓
+          推送到 GitHub
+                ↓
+    jsdelivr CDN 自动加速
+                ↓
+        https://cdn.jsdelivr.net/gh/...
+```
+
+**优势**：
+- ✅ 免费（GitHub 无限存储，jsdelivr 免费 CDN）
+- ✅ 无需配置云存储权限
+- ✅ 代码和字体同一仓库，版本管理方便
+
+**劣势**：
+- ⚠️ `ERR_CACHE_MISS` 警告（jsdelivr 缓存策略，不影响功能）
+- ⚠️ jsdelivr 在中国大陆偶尔不稳定
+
+### 方案 2：微信云存储（备选）
+
+```
+字体文件位置：云存储 fonts/ 文件夹
+                ↓
+          获取临时 HTTPS URL
+                ↓
+        wx.loadFontFace({ source: url })
+```
+
+**问题**：
+- ❌ 需要修改云存储权限规则（付费功能）
+- ❌ `wx.loadFontFace` 不支持本地路径
+
+**结论**：不推荐，除非 jsdelivr 在国内完全不可用。
+
+---
+
+## 已知问题
+
+### ERR_CACHE_MISS 警告
+
+```
+[渲染层网络层错误] Failed to load font https://cdn.jsdelivr.net/gh/...
+net::ERR_CACHE_MISS
+```
+
+**原因**：jsdelivr CDN 首次请求时缓存未命中
+
+**影响**：仅日志警告，字体仍正常加载和使用
+
+**解决**：忽略（无法从代码侧消除）
+
+---
 
 ## 验证方法
 
-在微信开发者工具中：
-1. 打开「调试器」→「Console」
-2. 查看是否有 "ZCOOL 字体加载成功" 和 "PressStart 字体加载成功" 日志
-3. 如果有 "加载失败" 警告，检查 URL 是否正确
+1. 编译小程序
+2. 查看 Console → 应无字体相关错误
+3. 检查页面 → "猜词" 标题应显示圆润字体
+4. 真机预览 → 字体效果更佳
+
+---
+
+## 备选 CDN
+
+如果 jsdelivr 在国内不稳定，可尝试：
+
+```css
+/* GitHub raw 直链（慢但稳定） */
+src: url("https://raw.githubusercontent.com/SLFGts/word-guess/main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2");
+
+/* ghproxy 加速 */
+src: url("https://ghproxy.com/https://raw.githubusercontent.com/SLFGts/word-guess/main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2");
+```
+
+---
+
+## 字体使用
+
+```css
+/* 中文圆润字体 */
+font-family: "ZCOOL", "PingFang SC", "Microsoft YaHei", sans-serif;
+
+/* 像素字体（数字/英文） */
+font-family: "PressStart", "Courier New", monospace;
+```
+
+---
+
+**文档最后更新**：2026-07-10
