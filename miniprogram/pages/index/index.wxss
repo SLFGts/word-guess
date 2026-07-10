@@ -1,0 +1,179 @@
+/* pages/index/index.wxss */
+/* 轻松像素涂鸦风格首页 */
+
+.home-page {
+  text-align: center;
+  padding-top: 88rpx;
+}
+
+/* 标题区 */
+.home-top {
+  margin-bottom: 44rpx;
+}
+
+.logo {
+  font-family: "ZCOOL", sans-serif;
+  font-size: 144rpx;
+  font-weight: 900;
+  line-height: 0.95;
+  text-shadow: 8rpx 8rpx 0 #3A3A3A;
+  -webkit-text-stroke: 2rpx #3A3A3A;
+  margin-bottom: 10rpx;
+}
+
+.logo-guess {
+  color: #FFB347;
+}
+
+.logo-word {
+  color: #FF9EBB;
+  margin-left: 10rpx;
+}
+
+.home-subtitle {
+  margin: 10rpx 0 44rpx;
+  color: #8A8578;
+  font-size: 28rpx;
+}
+
+/* 开始按钮 */
+.start-button {
+  width: 78%;
+  padding: 34rpx;
+  font-size: 52rpx;
+  margin-bottom: 20rpx;
+}
+
+.start-note {
+  font-size: 26rpx;
+  color: #8A8578;
+  margin: 20rpx 0 34rpx;
+}
+
+/* 最近战绩 */
+.recent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  margin: 0 auto 56rpx;
+  font-size: 26rpx;
+  box-shadow: 6rpx 6rpx 0 #3A3A3A;
+  max-width: 90%;
+}
+
+.recent-icon, .recent-star {
+  font-size: 36rpx;
+}
+
+.recent-text {
+  flex: 1;
+  text-align: center;
+  margin: 0 20rpx;
+}
+
+.recent-word {
+  font-weight: bold;
+}
+
+.recent-empty {
+  color: #FF9EBB;
+}
+
+/* 模式选择 */
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 38rpx 4rpx 24rpx;
+  text-align: left;
+}
+
+.section-title {
+  font-size: 38rpx;
+  font-weight: bold;
+}
+
+.section-link {
+  border: 0;
+  background: transparent;
+  color: #638CC8;
+  font-size: 26rpx;
+  padding: 0;
+}
+
+.mode-scroll {
+  display: flex;
+  gap: 26rpx;
+  overflow: auto;
+  padding: 4rpx 6rpx 24rpx;
+  scrollbar-width: none;
+  text-align: left;
+}
+
+.mode-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mode-card {
+  min-width: 336rpx;
+  min-height: 304rpx;
+  padding: 34rpx;
+  border: 6rpx solid #3A3A3A;
+  border-radius: 32rpx;
+  box-shadow: 10rpx 10rpx 0 #3A3A3A;
+  position: relative;
+  text-align: left;
+  color: #3A3A3A;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.mode-icon {
+  font-size: 60rpx;
+}
+
+.mode-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  display: block;
+  margin: 14rpx 0 6rpx;
+}
+
+.mode-desc {
+  font-size: 24rpx;
+  color: #6D6A61;
+}
+
+.mode-tag {
+  position: absolute;
+  right: 16rpx;
+  top: 18rpx;
+  padding: 6rpx 10rpx;
+  border: 2rpx solid #3A3A3A;
+  border-radius: 10rpx;
+  background: #C9A8E8;
+  font-size: 18rpx;
+  font-weight: bold;
+}
+
+/* 规则触发按钮 */
+.rules-trigger {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  color: #6D6A61;
+  font-size: 32rpx;
+  margin: 10rpx 0 24rpx;
+  padding: 0;
+}
+
+.rules-arrow {
+  font-size: 24rpx;
+}
+
+/* 波浪线 */
+.home-page > .wave {
+  margin: 50rpx -40rpx 0;
+}

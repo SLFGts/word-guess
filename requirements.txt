@@ -1,0 +1,8 @@
+# 词向量处理与本地原型所需 Python 依赖
+# 安装：pip install -r requirements.txt
+
+gensim>=4.3.0          # 加载词向量、most_similar、相似度计算
+pypinyin>=0.50.0       # 答案池标注字数/首字/拼音首字母（T2 提示）
+jieba>=0.42.1          # 词性标注，筛选内容词排除虚词（答案池构建）
+openai>=1.10.0         # 调 qwen-turbo（OpenAI 兼容协议）生成 T1 类别
+python-dotenv>=1.0.0   # 读取 .env 配置

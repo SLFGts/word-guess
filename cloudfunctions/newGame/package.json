@@ -1,0 +1,10 @@
+{
+  "name": "newGame",
+  "version": "1.0.0",
+  "description": "开局：LLM选词+预生成T1/T2+算排名表+存云数据库",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "openai": "^4.77.0"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "miniprogramRoot": "miniprogram/",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "appid": "wx7368dce1890844d0",
+  "projectname": "word-guess",
+  "description": "猜词小游戏（语义相似度猜词）",
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "data" },
+      { "type": "folder", "value": "scripts" },
+      { "type": "folder", "value": "prototype" },
+      { "type": "file", "value": ".env" },
+      { "type": "file", "value": ".env.example" },
+      { "type": "file", "value": "requirements.txt" },
+      { "type": "file", "value": "PLAN.md" },
+      { "type": "file", "value": "FONTS.md" },
+      { "type": "file", "value": "BACKEND.md" },
+      { "type": "file", "value": "PROGRESS.md" },
+      { "type": "file", "value": "DESIGN_PROMPT.md" }
+    ],
+    "include": []
+  },
+  "editorSetting": {}
+}

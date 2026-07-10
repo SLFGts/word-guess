@@ -1,0 +1,10 @@
+{
+  "name": "guess",
+  "version": "1.0.0",
+  "description": "猜词：查排名表+对数映射返分数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "openai": "^4.77.0"
+  }
+}

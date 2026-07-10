@@ -1,0 +1,9 @@
+{
+  "name": "getAnswer",
+  "version": "1.0.0",
+  "description": "调试用：获取目标词答案",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

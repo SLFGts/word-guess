@@ -1,0 +1,213 @@
+/* pages/stats/stats.wxss */
+/* 轻松像素涂鸦风格统计页 */
+
+.stats-page {
+  padding-top: 36rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: bold;
+}
+
+/* 游戏概览 */
+.stats-overview {
+  padding: 30rpx 26rpx;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 38rpx 4rpx 24rpx;
+  font-size: 38rpx;
+  font-weight: bold;
+}
+
+.section-link {
+  border: 0;
+  background: transparent;
+  color: #638CC8;
+  font-size: 26rpx;
+  padding: 0;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4rpx;
+}
+
+.stat-item {
+  text-align: center;
+  min-width: 0;
+}
+
+.stat-icon {
+  display: block;
+  font-size: 36rpx;
+  margin-bottom: 6rpx;
+}
+
+.stat-num {
+  font-size: 34rpx;
+  display: block;
+  margin-top: 6rpx;
+  font-weight: bold;
+}
+
+.stat-suffix {
+  font-size: 18rpx;
+  font-family: "ZCOOL", sans-serif;
+}
+
+.stat-label {
+  font-size: 20rpx;
+  color: #8A8578;
+  display: block;
+  margin-top: 4rpx;
+}
+
+/* 每日挑战 */
+.challenge {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8rpx;
+  align-items: center;
+  padding: 24rpx 26rpx;
+  margin-top: 36rpx;
+  background: #D4F5D0;
+}
+
+.challenge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.challenge-title {
+  font-size: 34rpx;
+  font-weight: bold;
+}
+
+.challenge-sub {
+  color: #6D786B;
+  font-size: 22rpx;
+}
+
+.challenge-day {
+  font-size: 36rpx;
+  color: #75B475;
+  text-align: right;
+}
+
+.challenge-day-sub {
+  font-size: 16rpx;
+}
+
+.challenge-btn {
+  grid-column: 1 / -1;
+  padding: 16rpx;
+  font-size: 30rpx;
+  margin-top: 8rpx;
+}
+
+/* 成就徽章 */
+.badges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.badge {
+  border: 4rpx solid #3A3A3A;
+  border-radius: 24rpx;
+  background: #FFF8EE;
+  text-align: center;
+  padding: 18rpx 6rpx;
+}
+
+.badge-icon {
+  font-size: 52rpx;
+  display: block;
+  margin-bottom: 6rpx;
+}
+
+.badge-name {
+  font-size: 20rpx;
+  font-weight: bold;
+}
+
+.badge.locked {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+/* 最近游戏 */
+.recent-head {
+  margin-top: 46rpx;
+}
+
+.history-stats {
+  display: grid;
+  gap: 18rpx;
+}
+
+.game-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 26rpx;
+  border-width: 4rpx;
+  border-radius: 24rpx;
+}
+
+.game-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.game-word {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.game-date {
+  color: #8A8578;
+  font-size: 22rpx;
+}
+
+.game-row-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  align-items: flex-end;
+}
+
+.game-count-tag {
+  font-size: 22rpx;
+  background: #FFCF81;
+  border: 2rpx solid #3A3A3A;
+  border-radius: 10rpx;
+  padding: 6rpx 10rpx;
+  display: inline-block;
+}
+
+.game-time {
+  font-size: 22rpx;
+  color: #8A8578;
+}
+
+/* 清除按钮 */
+.clear-button {
+  display: block;
+  margin: 42rpx auto 0;
+  border: 4rpx dashed #FF9EBB;
+  background: transparent;
+  border-radius: 18rpx;
+  padding: 14rpx 30rpx;
+  color: #AA5970;
+  font-size: 28rpx;
+}

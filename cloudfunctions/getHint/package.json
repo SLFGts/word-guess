@@ -1,0 +1,10 @@
+{
+  "name": "getHint",
+  "version": "1.0.0",
+  "description": "提示：T1描述/T2锚点(缓存+LLM生成)/T3提问裁判",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "openai": "^4.77.0"
+  }
+}

@@ -1,0 +1,13 @@
+<!--components/giveup-modal/giveup-modal.wxml-->
+<!-- 放弃结算弹窗 -->
+
+<view class="modal-bg">
+  <view class="modal-card giveup-modal">
+    <text class="giveup-icon">💪</text>
+    <text class="giveup-title">差一点就猜到了！</text>
+    <text class="giveup-answer">答案是：<text class="giveup-word">{{targetWord}}</text></text>
+    <text class="giveup-stats">猜测 {{guessCount}} 次 · 最高分 {{maxScore}}%</text>
+    <button class="doodle-button modal-ok" bindtap="onPlayAgain">再来一局 ▶</button>
+    <button class="giveup-home-btn" bindtap="onGoHome">返回首页 🏠</button>
+  </view>
+</view>

@@ -1,0 +1,83 @@
+<!--pages/stats/stats.wxml-->
+<!-- 轻松像素涂鸦风格统计页 -->
+
+<view class="page stats-page">
+  <!-- 导航栏 -->
+  <view class="nav">
+    <button class="nav-back" bindtap="onGoBack">←</button>
+    <text class="nav-title">我的统计</text>
+    <text class="star" style="top:0;right:0;color:#C9A8E8;">✦</text>
+  </view>
+
+  <!-- 游戏概览卡片 -->
+  <view class="stats-overview doodle-card">
+    <view class="section-heading">
+      <text>◆ 游戏概览</text>
+    </view>
+    <view class="stat-row">
+      <view class="stat-item">
+        <text class="stat-icon">🎮</text>
+        <text class="stat-num pixel" style="color:#FFB347;">{{totalGames}}</text>
+        <text class="stat-label">总游戏数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-icon">⭐</text>
+        <text class="stat-num pixel" style="color:#A8E6A3;">{{winRate}}<text class="stat-suffix">%</text></text>
+        <text class="stat-label">胜率</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-icon">🎯</text>
+        <text class="stat-num pixel" style="color:#A3C4F3;">{{avgGuesses}}</text>
+        <text class="stat-label">平均猜测</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-icon">🔥</text>
+        <text class="stat-num pixel" style="color:#C9A8E8;">{{streakDays}}</text>
+        <text class="stat-label">连续天数</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日挑战 -->
+  <view class="challenge doodle-card">
+    <view class="challenge-info">
+      <text class="challenge-title"> 每日挑战</text>
+      <text class="challenge-sub">第 {{challengeDay}} 天 · 连胜中！</text>
+    </view>
+    <text class="challenge-day pixel">{{challengeDay}} <text class="challenge-day-sub">DAY</text></text>
+    <button class="doodle-button challenge-btn" bindtap="onChallenge">去挑战 ▶</button>
+  </view>
+
+  <!-- 成就徽章 -->
+  <view class="section-heading">
+    <text>🏅 成就徽章</text>
+    <button class="section-link">查看全部 →</button>
+  </view>
+  <view class="badges">
+    <view class="badge {{item.unlocked ? '' : 'locked'}}" wx:for="{{badges}}" wx:key="name">
+      <text class="badge-icon">{{item.icon}}</text>
+      <text class="badge-name">{{item.name}}</text>
+    </view>
+  </view>
+
+  <!-- 最近游戏 -->
+  <view class="section-heading recent-head">
+    <text>📝 最近游戏</text>
+    <button class="section-link">查看全部</button>
+  </view>
+  <view class="history-stats">
+    <view class="game-row doodle-card" wx:for="{{recentGames}}" wx:key="word">
+      <view class="game-row-left">
+        <text class="game-word">{{item.word}}</text>
+        <text class="game-date">{{item.date}}</text>
+      </view>
+      <view class="game-row-right">
+        <text class="game-count-tag">{{item.count}} 次猜中</text>
+        <text class="game-time">{{item.time}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 清除记录按钮 -->
+  <button class="clear-button" bindtap="onClearHistory">清除记录 ️</button>
+</view>

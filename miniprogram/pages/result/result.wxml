@@ -1,0 +1,74 @@
+<!--pages/result/result.wxml-->
+<!-- 轻松像素涂鸦风格结算庆祝页 -->
+
+<view class="page result-page">
+  <!-- 顶部庆祝装饰 -->
+  <view class="confetti">✦ ◆ ✦ ● ✦</view>
+
+  <!-- 庆祝标题 -->
+  <view class="result-title">🎉 猜中啦！</view>
+  <view class="result-sub">你离答案越来越近，太棒了！</view>
+
+  <!-- 目标词卡片（每个字独立彩色卡片） -->
+  <view class="word-cards">
+    <view class="word-card word-card-1">苹</view>
+    <view class="word-card word-card-2">果</view>
+  </view>
+
+  <!-- 中央成绩卡片 -->
+  <view class="result-card doodle-card">
+    <view class="result-card-title">📊 本场成绩</view>
+
+    <!-- 四宫格数据 -->
+    <view class="result-grid">
+      <view class="metric">
+        <text class="metric-num pixel" style="color:#FFB347">{{guessCount}}</text>
+        <text class="metric-label">次猜测</text>
+      </view>
+      <view class="metric">
+        <text class="metric-num pixel" style="color:#A8E6A3">{{maxScore}}%</text>
+        <text class="metric-label">最高分</text>
+      </view>
+      <view class="metric">
+        <text class="metric-num pixel" style="color:#A3C4F3">{{totalTime}}</text>
+        <text class="metric-label">总用时</text>
+      </view>
+      <view class="metric">
+        <text class="metric-num pixel" style="color:#FF9EBB">{{hintUsed}}</text>
+        <text class="metric-label">提示</text>
+      </view>
+    </view>
+
+    <!-- 趣味评价 -->
+    <view class="praise">{{praise}}</view>
+
+    <!-- 分数曲线图 -->
+    <view class="path">
+      <view class="path-title">
+        <text>逼近路径</text>
+        <text class="path-sub">开始    猜中！</text>
+      </view>
+      <svg viewBox="0 0 300 100" class="score-chart">
+        <!-- 黑色粗线 -->
+        <path d="M5 86 L55 72 L112 67 L170 42 L230 34 L295 10"
+              fill="none" stroke="#3A3A3A" stroke-width="5" stroke-linecap="round"/>
+        <!-- 暖橙色细线 -->
+        <path d="M5 86 L55 72 L112 67 L170 42 L230 34 L295 10"
+              fill="none" stroke="#FFB347" stroke-width="3" stroke-linecap="round"/>
+        <!-- 数据点 -->
+        <g fill="#FFB347" stroke="#3A3A3A" stroke-width="2">
+          <circle cx="5" cy="86" r="5"/>
+          <circle cx="55" cy="72" r="5"/>
+          <circle cx="112" cy="67" r="5"/>
+          <circle cx="170" cy="42" r="5"/>
+          <circle cx="230" cy="34" r="5"/>
+          <circle cx="295" cy="10" r="5"/>
+        </g>
+      </svg>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮 -->
+  <button class="doodle-button result-primary" bindtap="onPlayAgain">再来一局 ▶</button>
+  <button class="return-button" bindtap="onGoHome">返回首页 🏠</button>
+</view>

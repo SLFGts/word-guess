@@ -1,0 +1,47 @@
+/* components/rules-modal/rules-modal.wxss */
+/* 规则说明弹窗样式 */
+
+.rules-modal {
+  text-align: center;
+}
+
+.modal-title {
+  display: block;
+  text-align: center;
+  font-size: 50rpx;
+  font-weight: bold;
+  margin: 6rpx 0 24rpx;
+}
+
+.rules-list {
+  padding: 8rpx 8rpx;
+  margin: 28rpx 0 40rpx;
+  display: grid;
+  gap: 34rpx;
+  text-align: left;
+  font-size: 30rpx;
+  line-height: 1.45;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+
+.rule-icon {
+  font-size: 42rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.rule-text {
+  flex: 1;
+  font-size: 30rpx;
+}
+
+.modal-ok {
+  width: 100%;
+  padding: 22rpx;
+  font-size: 38rpx;
+}

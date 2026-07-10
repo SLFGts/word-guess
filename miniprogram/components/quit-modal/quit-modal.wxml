@@ -1,0 +1,12 @@
+<!--components/quit-modal/quit-modal.wxml-->
+<!-- 放弃确认弹窗 -->
+
+<view class="modal-bg" bindtap="onContinue">
+  <view class="modal-card quit-modal" catchtap>
+    <text class="quit-icon">🤔</text>
+    <text class="quit-title">要放弃这一局吗？</text>
+    <text class="quit-sub">当前已猜 {{guessCount}} 次，最高分 {{maxScore}}</text>
+    <button class="doodle-button modal-ok" bindtap="onContinue">继续猜词 💪</button>
+    <button class="quit-btn" bindtap="onQuit">放弃本局</button>
+  </view>
+</view>

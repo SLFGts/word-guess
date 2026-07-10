@@ -1,0 +1,17 @@
+<!--components/rules-modal/rules-modal.wxml-->
+<!-- 规则说明弹窗 -->
+
+<view class="modal-bg" bindtap="onClose">
+  <view class="modal-card rules-modal" catchtap>
+    <button class="modal-close" bindtap="onClose">×</button>
+    <text class="modal-title"> 玩法规则</text>
+    <view class="wave">〰〰〰〰〰〰〰〰</view>
+    <view class="rules-list">
+      <view class="rule-item" wx:for="{{rules}}" wx:key="text">
+        <text class="rule-icon">{{item.icon}}</text>
+        <text class="rule-text">{{item.text}}</text>
+      </view>
+    </view>
+    <button class="doodle-button modal-ok" bindtap="onClose">知道了 ✓</button>
+  </view>
+</view>

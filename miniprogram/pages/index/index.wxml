@@ -1,0 +1,57 @@
+<!--pages/index/index.wxml-->
+<!-- 轻松像素涂鸦风格首页：认知 + 决策 -->
+
+<view class="page home-page">
+  <!-- 装饰星星 -->
+  <text class="star" style="top:92rpx;left:60rpx;"></text>
+  <text class="star" style="top:156rpx;right:76rpx;color:#C9A8E8;">◆</text>
+
+  <!-- 顶部标题区 -->
+  <view class="home-top">
+    <view class="logo"><text class="logo-guess">猜</text><text class="logo-word">词</text></view>
+    <text class="home-subtitle">输入一个词，看看离答案有多远~</text>
+  </view>
+
+  <!-- 核心操作区 -->
+  <button class="doodle-button start-button" bindtap="onQuickStart">快速开始 <text class="pixel">▶</text></button>
+  <text class="start-note">点击开始一场猜词冒险</text>
+
+  <!-- 最近战绩（蔡加尼克效应钩子） -->
+  <view class="recent doodle-card" wx:if="{{recentGame}}">
+    <text class="recent-icon">✏️</text>
+    <text class="recent-text">最近：<text class="recent-word">{{recentGame.word}}</text> · {{recentGame.count}} 次猜中 · {{recentGame.time}}</text>
+    <text class="recent-star">⭐</text>
+  </view>
+  <view class="recent doodle-card" wx:else>
+    <text class="recent-icon">✏️</text>
+    <text class="recent-text recent-empty">还没有记录，快来第一局！</text>
+    <text class="recent-star">⭐</text>
+  </view>
+
+  <!-- 模式选择区 -->
+  <view class="section-heading">
+    <text class="section-title">◆ 选择模式</text>
+    <button class="section-link" bindtap="onGoStats">我的战绩 →</button>
+  </view>
+
+  <scroll-view class="mode-scroll" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
+    <view class="mode-card" style="background:{{item.color}}" wx:for="{{modes}}" wx:key="title" bindtap="onSelectMode" data-mode="{{item.mode}}">
+      <text class="mode-icon">{{item.icon}}</text>
+      <text class="mode-tag" wx:if="{{item.tag}}">{{item.tag}}</text>
+      <text class="mode-title">{{item.title}}</text>
+      <text class="mode-desc">{{item.text}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 规则说明折叠面板 -->
+  <button class="rules-trigger" bindtap="onOpenRules"> 玩法规则 <text class="rules-arrow">⌄</text></button>
+
+  <!-- 波浪线装饰 -->
+  <view class="wave">〰〰〰〰〰〰〰〰〰〰〰</view>
+
+  <!-- 右下角装饰 -->
+  <text class="star" style="bottom:64rpx;right:64rpx;color:#A3C4F3;">✦</text>
+
+  <!-- 规则弹窗 -->
+  <rules-modal wx:if="{{rulesOpen}}" rules="{{rules}}" bind:close="onCloseRules" />
+</view>

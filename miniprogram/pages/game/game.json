@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "quit-modal": "/components/quit-modal/quit-modal"
+  },
+  "navigationStyle": "custom"
+}
