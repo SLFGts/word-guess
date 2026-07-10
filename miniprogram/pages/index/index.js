@@ -24,17 +24,8 @@ Page({
     ]
   },
 
-  async onLoad() {
-    // 等待字体加载完成再渲染
-    const app = getApp();
-    await app.getFontPromise();
-
+  onLoad() {
     this.loadRecentGame();
-  },
-
-  onReady() {
-    // 字体加载完成后强制重绘
-    this.setData({});
   },
 
   onShow() {
