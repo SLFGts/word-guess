@@ -1,179 +1,218 @@
 /* pages/index/index.wxss */
-/* 轻松像素涂鸦风格首页 */
+/* 卡通刺猬风格首页：刺猬放大呼吸版
+   动效策略：刺猬呼吸跳动(2.2s) + 主按钮脉冲(2.5s) + 装饰图案轻浮动；避免过多动效 */
 
 .home-page {
-  text-align: center;
-  padding-top: 88rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--space-8);   /* 88rpx 顶部留白，突出标题区 */
 }
 
-/* 标题区 */
-.home-top {
-  margin-bottom: 44rpx;
+/* —— 角落像素装饰星（复用全局 .star，覆盖为静态）—— */
+.home-page .star {
+  animation: none;
+}
+.star-tl {
+  top: 24rpx; left: 28rpx;
+  font-size: var(--text-2xl);
+  color: var(--color-primary);
+}
+.star-tr {
+  top: 60rpx; right: 36rpx;
+  font-size: var(--text-2xl);
+  color: var(--color-purple);
+}
+.star-br {
+  bottom: calc(48rpx + var(--safe-bottom));
+  right: 32rpx;
+  font-size: var(--text-2xl);
+  color: var(--color-blue);
 }
 
-.logo {
-  font-family: "ZCOOL", sans-serif;
-  font-size: 144rpx;
-  font-weight: 900;
-  line-height: 0.95;
-  text-shadow: 8rpx 8rpx 0 #3A3A3A;
-  -webkit-text-stroke: 2rpx #3A3A3A;
-  margin-bottom: 10rpx;
+/* —— 标题容器：relative 定位，让装饰围绕标题紧密散落 —— */
+.home-header {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: var(--space-1);
 }
 
-.logo-guess {
-  color: #FFB347;
+/* —— 装饰散布：像素图案（✦ ◆ ● ✧），负偏移浮在标题四周 —— */
+.deco {
+  position: absolute;
+  font-family: "PressStart", "Courier New", monospace;
+  line-height: var(--leading-none);
+}
+/*  标题左上方（左上角外侧） */
+.deco-a {
+  top: -30rpx; left: -180rpx;
+  font-size: 38rpx;
+  color: var(--color-primary);
+  transform: rotate(-6deg);
+  animation: decoFloat 3.4s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+/* ◆ 标题右上方（右上角外侧） */
+.deco-b {
+  top: 20rpx; right: -160rpx;
+  font-size: 26rpx;
+  color: var(--color-purple);
+  transform: rotate(10deg);
+  animation: decoFloat 2.8s ease-in-out infinite;
+  animation-delay: 0.7s;
+}
+/* ● 标题左下方（左下角外侧） */
+.deco-d {
+  bottom: -20rpx; left: -130rpx;
+  font-size: 20rpx;
+  color: var(--color-pink);
+  animation: decoFloat 3.6s ease-in-out infinite;
+  animation-delay: 1.3s;
+}
+/* ✧ 标题左侧中部 */
+.deco-e {
+  top: 30rpx; left: -50rpx;
+  font-size: 30rpx;
+  color: var(--color-blue);
+  transform: rotate(-12deg);
+  animation: decoFloat 3.2s ease-in-out infinite;
+  animation-delay: 0.9s;
+}
+/* ◆ 标题右下方（右下角外侧） */
+.deco-f {
+  bottom: -50rpx; right: -90rpx;
+  font-size: 32rpx;
+  color: var(--color-green);
+  transform: rotate(14deg);
+  animation: decoFloat 3.0s ease-in-out infinite;
+  animation-delay: 1.6s;
 }
 
+/* 贴纸感浮动：只上下位移，保持各自静态倾斜角度（不摆动） */
+@keyframes decoFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6rpx); }
+}
+
+/* —— 标题文字 —— */
+.home-title {
+  line-height: var(--leading-none);   /* 防 page 全局 line-height:1.5 撑开标题（坑 4.5） */
+}
+
+.logo-guess,
 .logo-word {
-  color: #FF9EBB;
+  font-family: "ZCOOL", sans-serif;
+  font-size: var(--text-7xl);    /* 144rpx 大标题 */
+  font-weight: 900;
+  text-shadow: var(--shadow-sm);            /* 6rpx 偏移硬阴影，复用 Token */
+  -webkit-text-stroke: 2rpx var(--color-border);
+  line-height: var(--leading-none);
+}
+.logo-guess { color: var(--color-primary); }
+.logo-word {
+  color: var(--color-pink);
   margin-left: 10rpx;
 }
 
 .home-subtitle {
-  margin: 10rpx 0 44rpx;
-  color: #8A8578;
-  font-size: 28rpx;
+  font-size: var(--text-md);
+  color: var(--color-text-sub);
+  line-height: var(--leading-snug);
+  margin-top: var(--space-2);
 }
 
-/* 开始按钮 */
+.home-wave {
+  margin-bottom: var(--space-2);
+}
+
+/* —— 刺猬舞台：放大主体 —— */
+.hedgehog-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--space-3) 0 var(--space-3);
+}
+
+.hedgehog-img {
+  width: 480rpx;                 /* 主体显著放大：320 → 480，绝对主角 */
+  height: 480rpx;
+}
+
+/* 刺猬呼吸跳动：scale 轻微缩放 + 轻微上下位移，营造"活"的感觉 */
+.hedgehog-bounce {
+  animation: hedgehogBreath 2.2s ease-in-out infinite;
+}
+
+@keyframes hedgehogBreath {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-10rpx) scale(1.04); }
+}
+
+/* —— 开始游戏主按钮（双行：主标题 + 引导副行，融入按钮内部）—— */
 .start-button {
-  width: 78%;
-  padding: 34rpx;
-  font-size: 52rpx;
-  margin-bottom: 20rpx;
-}
-
-.start-note {
-  font-size: 26rpx;
-  color: #8A8578;
-  margin: 20rpx 0 34rpx;
-}
-
-/* 最近战绩 */
-.recent {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20rpx 24rpx;
-  margin: 0 auto 56rpx;
-  font-size: 26rpx;
-  box-shadow: 6rpx 6rpx 0 #3A3A3A;
-  max-width: 90%;
-}
-
-.recent-icon, .recent-star {
-  font-size: 36rpx;
-}
-
-.recent-text {
-  flex: 1;
-  text-align: center;
-  margin: 0 20rpx;
-}
-
-.recent-word {
-  font-weight: bold;
-}
-
-.recent-empty {
-  color: #FF9EBB;
-}
-
-/* 模式选择 */
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 38rpx 4rpx 24rpx;
-  text-align: left;
-}
-
-.section-title {
-  font-size: 38rpx;
-  font-weight: bold;
-}
-
-.section-link {
-  border: 0;
-  background: transparent;
-  color: #638CC8;
-  font-size: 26rpx;
-  padding: 0;
-}
-
-.mode-scroll {
-  display: flex;
-  gap: 26rpx;
-  overflow: auto;
-  padding: 4rpx 6rpx 24rpx;
-  scrollbar-width: none;
-  text-align: left;
-}
-
-.mode-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.mode-card {
-  min-width: 336rpx;
-  min-height: 304rpx;
-  padding: 34rpx;
-  border: 6rpx solid #3A3A3A;
-  border-radius: 32rpx;
-  box-shadow: 10rpx 10rpx 0 #3A3A3A;
-  position: relative;
-  text-align: left;
-  color: #3A3A3A;
+  width: 75%;
+  padding: var(--space-5) 0 var(--space-4);   /* 上 34rpx / 下 28rpx，给副行留空间 */
+  background: var(--color-primary);
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
+  align-items: center;
+  gap: var(--space-1);              /* 主副行间距 8rpx */
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-7);    /* 56rpx，直接衔接底部卡片 */
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.start-button:active {
+  transform: translate(6rpx, 6rpx);
+  box-shadow: 2rpx 2rpx 0 var(--color-shadow);
+  animation: none;
 }
 
-.mode-icon {
-  font-size: 60rpx;
+.start-main {
+  font-size: var(--text-3xl);    /* 50rpx 主行 */
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: var(--leading-tight);
 }
 
-.mode-title {
-  font-size: 40rpx;
+.start-sub {
+  font-size: var(--text-base);     /* 18rpx 副行，小巧不抢戏 */
+  color: var(--color-on-accent);  /* 暖白，与暖橙按钮底对比 */
+  line-height: var(--leading-tight);
+  font-weight: 500;
+}
+
+/* —— 底部双入口卡片 —— */
+.bottom-actions {
+  display: flex;
+  justify-content: center;
+  width: 84%;
+  gap: var(--space-4);
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-card);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.action-btn:active {
+  transform: translate(4rpx, 4rpx);
+  box-shadow: var(--shadow-xs);
+}
+.action-icon {
+  font-size: var(--text-4xl);
+  line-height: var(--leading-none);
+}
+.action-label {
+  font-size: var(--text-md);
+  color: var(--color-text);
   font-weight: bold;
-  display: block;
-  margin: 14rpx 0 6rpx;
-}
-
-.mode-desc {
-  font-size: 24rpx;
-  color: #6D6A61;
-}
-
-.mode-tag {
-  position: absolute;
-  right: 16rpx;
-  top: 18rpx;
-  padding: 6rpx 10rpx;
-  border: 2rpx solid #3A3A3A;
-  border-radius: 10rpx;
-  background: #C9A8E8;
-  font-size: 18rpx;
-  font-weight: bold;
-}
-
-/* 规则触发按钮 */
-.rules-trigger {
-  border: 0;
-  background: transparent;
-  font-family: inherit;
-  color: #6D6A61;
-  font-size: 32rpx;
-  margin: 10rpx 0 24rpx;
-  padding: 0;
-}
-
-.rules-arrow {
-  font-size: 24rpx;
-}
-
-/* 波浪线 */
-.home-page > .wave {
-  margin: 50rpx -40rpx 0;
+  line-height: var(--leading-tight);
 }

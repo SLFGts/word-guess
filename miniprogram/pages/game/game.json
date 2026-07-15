@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "quit-modal": "/components/quit-modal/quit-modal"
+    "quit-modal": "/components/quit-modal/quit-modal",
+    "giveup-modal": "/components/giveup-modal/giveup-modal"
   },
   "navigationStyle": "custom"
 }

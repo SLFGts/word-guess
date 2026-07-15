@@ -6,7 +6,7 @@ const store = {
   guesses: [],          // [{word, score, order}] 猜测历史
   orderCounter: 0,      // 有效猜测序号（重复词不消耗）
   maxScore: -1,         // 当前局最高分（新高提示+最高分高亮）
-  hints: { t1: null, t2: null, qa: null },  // 已解锁提示
+  hints: { t1: null, t2: null, t3: null, qa: null },  // 已解锁提示（t1=类别, t2=范围, t3=特征, qa=问答）
 }
 
 // 开新局重置状态
@@ -16,7 +16,7 @@ function reset(gameId, len) {
   store.guesses = []
   store.orderCounter = 0
   store.maxScore = -1
-  store.hints = { t1: null, t2: null, qa: null }
+  store.hints = { t1: null, t2: null, t3: null, qa: null }
 }
 
 // 记一次猜测（去重：重复词不消耗序号），返回是否新增

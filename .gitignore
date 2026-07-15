@@ -4,13 +4,20 @@
 # 依赖目录
 node_modules/
 cloudfunctions/*/node_modules/
+高保真原型设计/node_modules/
 
-# Claude 配置
+# 编辑器/IDE 配置
 .claude/
+.trae/
 
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
 
 # 大文件（向量数据，不需要版本管理）
 data/vectors-f32.bin
@@ -20,4 +27,3 @@ data/vectors.json
 *.tmp
 *.log
 data/raw/
-data/vectors.json

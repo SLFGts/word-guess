@@ -141,7 +141,7 @@ function leaksTarget(text, target) {
 
 function buildPickPrompt(candidateWords) {
   const cand = candidateWords.map((w, i) => `${i + 1}. ${w}`).join('\n')
-  return `你是猜词游戏的设计师。下面 ${candidateWords.length} 个词是随机候选，请从中选出最适合作为「目标词」的一个，并为它生成两条提示。
+  return `你是猜词游戏的设计师。下面 ${candidateWords.length} 个词是随机候选，请从中选出最适合作为「目标词」的一个，并为它生成三条递进提示。
 
 候选词：
 ${cand}
@@ -156,27 +156,41 @@ ${cand}
   · 过于口语化、像动作短语而非固定词的（如「爬起来」）
   · 特殊领域的专业术语（如「钢格板」）
 
-【生成要求】选出目标词后，同时生成两条提示：
+【生成要求】选出目标词后，同时生成三条递进提示（从宽到窄，逐步引导玩家猜中）：
 
-提示 1（描述）：
-- 包含词性、领域，必要时加通俗形容
-- 30 个汉字以内
+提示 1（类别）：
+- 用极简短语说明目标词的词性 + 所属大类，让玩家一眼知道方向
+- 常见格式：「一种XX」「一种XX类XX」「XX领域的XX」
+- 示例：「一种水果」「一种哺乳动物」「亚洲国家」「中国传统乐器」
+- 10 个汉字以内
 - 不得出现目标词本身的任何一个字
-- 不得说出目标词或其近义词；生僻词可点明「这是一个生僻词」
-- 通俗直白，不文言化
-- 只输出描述本身，不带「提示」前缀、引号、序号
+- 只输出短语本身，不带引号、前缀
 
-提示 2（锚点）：
-- 给一个和目标词相关联的词，作方向提示
-- 相关但不是同义词、不是变体、不与目标词共享任何一个字
-- 只输出这个词本身，不带引号、解释或前缀
+提示 2（范围）：
+- 在类别基础上进一步缩小范围，从产地、体型、颜色、材质、功能、时代、使用场景等任一角度切入
+- 示例：「常见于热带地区」「属于犬科」「多用于厨房」「诞生于唐朝」
+- 20 个汉字以内
+- 不得出现目标词本身的任何一个字
+- 不得说出目标词或其近义词
+- 只输出范围描述本身，不带引号、前缀
+
+提示 3（特征）：
+- 给出一个鲜明、具体、有辨识度的特征或细节，让已经缩小范围的玩家可以锁定答案
+- 示例：「果皮有刺且气味浓烈」「尾巴蓬松会竖起来」「可以拉出四种不同音高」「以竹子为食」
+- 20 个汉字以内
+- 不得出现目标词本身的任何一个字
+- 不得说出目标词或其近义词
+- 只输出特征描述本身，不带引号、前缀
+
+三条提示必须形成「类别→范围→特征」的递进漏斗，后一条比前一条更接近答案。
 
 【输出格式】严格按以下 JSON 输出，不要输出其他任何内容：
 {
   "chosen": "选中的目标词（必须是上面候选之一，原样）",
   "reason": "一句话选词理由，20 字内",
-  "t1": "T1 描述提示",
-  "anchor": "T2 锚点词"
+  "t1": "类别提示（≤10字）",
+  "t2": "范围提示（≤20字）",
+  "t3": "特征提示（≤20字）"
 }`
 }
 
@@ -190,15 +204,16 @@ async function smartPick(candidateWords) {
         model: process.env.LLM_MODEL || 'qwen-turbo',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.8,
-        max_tokens: 300,
+        max_tokens: 400,
         response_format: { type: 'json_object' },
       })
       const result = JSON.parse(resp.choices[0].message.content.trim())
       const chosen = result.chosen || ''
       if (!candidateWords.includes(chosen)) continue
-      const t1 = (result.t1 && result.t1.length <= 60 && !leaksTarget(result.t1, chosen)) ? result.t1 : null
-      const anchor = (result.anchor && !leaksTarget(result.anchor, chosen)) ? result.anchor : null
-      return { target: chosen, t1, anchor }
+      const t1 = (result.t1 && result.t1.length <= 20 && !leaksTarget(result.t1, chosen)) ? result.t1 : null
+      const t2 = (result.t2 && result.t2.length <= 30 && !leaksTarget(result.t2, chosen)) ? result.t2 : null
+      const t3 = (result.t3 && result.t3.length <= 30 && !leaksTarget(result.t3, chosen)) ? result.t3 : null
+      return { target: chosen, t1, t2, t3 }
     } catch (e) {
       console.log(`smart_pick attempt${attempt + 1} 异常：${e.message}`)
       continue
@@ -227,16 +242,18 @@ async function newGameVector(event) {
 
   const candidates = sampleCandidates(5)
   const pick = await smartPick(candidates)
-  let target, preT1, preAnchor
+  let target, preT1, preT2, preT3
 
   if (pick) {
     target = pick.target
-    preT1 = pick.t1
-    preAnchor = pick.anchor
+    preT1 = pick.t1       // 类别提示（直接展示在字数后）
+    preT2 = pick.t2       // 范围提示（按钮1）
+    preT3 = pick.t3       // 特征提示（按钮2）
   } else {
     target = _playable[Math.floor(Math.random() * _playable.length)]
     preT1 = null
-    preAnchor = null
+    preT2 = null
+    preT3 = null
   }
 
   const rankings = computeRankings(target)
@@ -247,30 +264,46 @@ async function newGameVector(event) {
       gameId,
       target,
       rankings,
-      t1: preT1,
-      t3: preAnchor,
-      qa: null,
+      t1: preT1,          // 类别（直接展示）
+      t2: preT2,          // 范围（按钮1）
+      t3: preT3,          // 特征（按钮2）
+      qa: null,            // 问答（按钮3，实时生成）
       mode,
       similarityMode: 'vector',
       createdAt: db.serverDate()
     }
   })
 
-  return { gameId, wordCount: _words.length, len: target.length, similarityMode: 'vector' }
+  return { gameId, wordCount: _words.length, len: target.length, similarityMode: 'vector', t1: preT1 }
 }
 
 // ===== Mode B：Embedding API 方案 =====
 
-// Mode B 开局逻辑
+// Mode B 开局逻辑（选词/T1+T2+T3 预生成与 Mode A 共用同一套 LLM 流程）
 async function newGameEmbedding(event) {
   const mode = event.mode || 'normal'
   console.log(`Mode B (embedding)：${mode}`)
 
-  // 从词池选目标词（纯随机，不调 LLM）
-  const target = _playable[Math.floor(Math.random() * _playable.length)]
+  // === 智能选词：与 Mode A 共用 sampleCandidates + smartPick ===
+  const candidates = sampleCandidates(5)
+  const pick = await smartPick(candidates)
+  let target, preT1, preT2, preT3
+
+  if (pick) {
+    target = pick.target
+    preT1 = pick.t1       // 类别提示（直接展示）
+    preT2 = pick.t2       // 范围提示（按钮1）
+    preT3 = pick.t3       // 特征提示（按钮2）
+  } else {
+    // LLM 选题失败 → 随机降级（与 Mode A 一致）
+    target = _playable[Math.floor(Math.random() * _playable.length)]
+    preT1 = null
+    preT2 = null
+    preT3 = null
+  }
   console.log(`目标词：${target}（长度 ${target.length}）`)
 
-  // 调 Embedding API 获取目标词向量
+  // === 调 Embedding API 获取目标词向量 ===
   let targetVec = null
   try {
     targetVec = await getEmbedding(target)
@@ -286,13 +319,17 @@ async function newGameEmbedding(event) {
       gameId,
       target,
       targetVec,          // 目标词向量（用于后续 1v1 点积）
+      t1: preT1,          // 类别（直接展示）
+      t2: preT2,          // 范围（按钮1）
+      t3: preT3,          // 特征（按钮2）
+      qa: null,            // 问答（按钮3，实时生成）
       mode,
       similarityMode: 'embedding',
       createdAt: db.serverDate()
     }
   })
 
-  return { gameId, len: target.length, similarityMode: 'embedding', wordCount: _playable.length }
+  return { gameId, len: target.length, similarityMode: 'embedding', wordCount: _playable.length, t1: preT1 }
 }
 
 // ===== 云函数入口 =====

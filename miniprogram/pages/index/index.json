@@ -2,7 +2,6 @@
   "usingComponents": {
     "rules-modal": "/components/rules-modal/rules-modal"
   },
-  "navigationBarTitleText": "猜词",
   "navigationBarBackgroundColor": "#F5F0E1",
   "navigationBarTextStyle": "black"
 }

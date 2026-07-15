@@ -1,133 +1,151 @@
 <!--pages/game/game.wxml-->
 <!-- 轻松像素涂鸦风格游戏主界面：心流体验 -->
 
-<view class="page game-page">
-  <!-- 顶部状态栏 -->
-  <view class="game-head">
-    <button class="nav-back" bindtap="onOpenQuit">←</button>
-    <view class="game-head-center">
-      <text>第 <text class="pixel">{{guessCount}}</text> 次猜测</text>
-      <text class="game-mode">{{mode === 'daily' ? '每日挑战' : mode === 'theme' ? '主题专场' : '普通模式'}}</text>
-    </view>
-    <text class="tiny-stars">✦ ◆</text>
-  </view>
+<!-- 用 page-container 包裹整个页面内容，拦截侧滑手势/物理返回键/navigateBack -->
+<page-container
+  show="{{swipeBackIntercept}}"
+  overlay="{{false}}"
+  duration="0"
+  custom-style="height:100vh;overflow:scroll;background:var(--color-bg, #F5F0E1)"
+  bind:beforeleave="onSwipeBackBeforeLeave"
+  bind:afterleave="onSwipeBackAfterLeave">
 
-  <!-- 目标词字数提示卡片 -->
-  <view class="target-card doodle-card">
-    <text class="target-icon">🎯</text>
-    <view class="target-info">
-      <text class="target-label">目标词</text>
-      <text class="target-word pixel">???</text>
-    </view>
-    <text class="target-len">{{wordLen}} 个字</text>
-  </view>
-
-  <!-- 输入区 -->
-  <view class="guess-row">
-    <input class="guess-input"
-           value="{{word}}"
-           bindinput="onInput"
-           bindconfirm="onGuess"
-           placeholder="输入一个中文词..."
-           placeholder-class="guess-placeholder"
-           confirm-type="done" />
-    <button class="doodle-button guess-btn" bindtap="onGuess">猜！</button>
-  </view>
-
-  <!-- 分数读数区（情绪主轴） -->
-  <view class="score-card doodle-card">
-    <view class="score-top">
-      <text class="score-label">当前最高相关度</text>
-      <!-- Mode A: 百分比分数 -->
-      <text wx:if="{{similarityMode !== 'embedding'}}" class="score-num pixel {{score >= 75 ? 'hot' : ''}}" style="color:{{scoreColor}};">
-        {{score}}<text class="score-pct">%</text>
-      </text>
-      <!-- Mode B: 原始相似度 -->
-      <text wx:else class="score-num pixel {{similarity >= 0.6 ? 'hot' : ''}}" style="color:{{scoreColor}};">
-        {{similarity}}
-      </text>
-    </view>
-    <view class="score-bar">
-      <view class="score-bar-fill" style="width:{{barWidth}}%;background:{{barColor}};"></view>
-    </view>
-    <view class="score-scale">
-      <text>很远</text>
-      <text>接近啦！</text>
-      <text>猜中！</text>
-    </view>
-    <text class="score-hint" style="color:{{scoreColor}};">{{scoreHint}}</text>
-  </view>
-
-  <!-- 波浪线分隔 -->
-  <view class="wave">〰〰〰〰〰〰〰〰〰</view>
-
-  <!-- 猜测历史列表 -->
-  <view class="history-title">
-    <text>✦ 猜测记录</text>
-    <text class="history-sub">由低到高 ↑</text>
-  </view>
-
-  <scroll-view class="guess-list" scroll-y enhanced enable-flex>
-    <view class="guess-item doodle-card {{item.isBest ? 'best' : ''}}"
-          wx:for="{{guesses}}" wx:key="word">
-      <text class="guess-word">{{item.word}}</text>
-      <view class="mini-bar">
-        <view class="mini-bar-fill" style="width:{{item.barWidth || item.score}}%;background:{{item.color}};"></view>
+  <view class="page game-page" style="--safe-top:{{safeTop}}px">
+    <!-- 顶部信息栏：猜测次数 + 计时 -->
+    <view class="game-head">
+      <view class="nav-back" bindtap="onOpenQuit">←</view>
+      <view class="game-head-center">
+        <text class="guess-count-text">第 <text class="pixel guess-count-num">{{guessCount}}</text> 次猜测</text>
       </view>
-      <!-- Mode A: 百分比分数 -->
-      <text wx:if="{{similarityMode !== 'embedding'}}" class="guess-score pixel {{item.score >= 75 ? 'hot' : ''}}" style="color:{{item.color}};">{{item.score}}%</text>
-      <!-- Mode B: 原始相似度 -->
-      <text wx:else class="guess-score pixel {{item.similarity >= 0.6 ? 'hot' : ''}}" style="color:{{item.color}};">{{item.similarity}}</text>
-    </view>
-  </scroll-view>
-
-  <!-- 提示面板 -->
-  <view class="hint-area">
-    <text class="hint-title"> 使用提示</text>
-    <view class="hint-buttons">
-      <button class="doodle-button hint-btn {{t1Used ? 'doodle-button--disabled' : ''}}"
-              bindtap="onHint" data-level="1">
-        ️ 分类
-      </button>
-      <button class="doodle-button hint-btn {{t2Used ? 'doodle-button--disabled' : ''}}"
-              bindtap="onHint" data-level="2"
-              style="background:#C9A8E8;">
-         联想
-      </button>
-      <button class="doodle-button hint-btn {{t3Used ? 'doodle-button--disabled' : ''}}"
-              bindtap="onAsk"
-              style="background:#FF9EBB;">
-        ❓ 提问
-      </button>
+      <view class="timer-badge">
+        <text class="pixel">{{timeDisplay}}</text>
+      </view>
     </view>
 
-    <!-- 提示内容展示 -->
-    <view class="hint-card doodle-card" wx:if="{{hintText}}">
-      <text class="hint-tag">[T1]</text>
-      <text class="hint-text">{{hintText}}</text>
+    <!-- 英雄卡片：神秘目标词（视觉焦点） -->
+    <view class="hero-card">
+      <view class="hero-question-row">
+        <text class="hero-question pixel" wx:for="{{wordLen}}" wx:key="index">?</text>
+      </view>
+      <text class="hero-sub pixel">{{wordLen}}个字</text>
+      <text class="hero-category pixel" wx:if="{{t1}}">{{t1}}</text>
+    </view>
+
+    <!-- 输入区 + 提交按钮(同一行 7:3) -->
+    <view class="guess-row">
+      <input class="guess-input {{askingQuestion ? 'guess-input--question' : ''}}"
+             value="{{word}}"
+             bindinput="onInput"
+             bindconfirm="{{askingQuestion ? 'onAsk' : 'onGuess'}}"
+             placeholder="{{askingQuestion ? '您有一次提问机会...' : '输入你的猜测...'}}"
+             placeholder-class="{{askingQuestion ? 'guess-placeholder--question' : 'guess-placeholder'}}"
+             confirm-type="done" />
+      <view class="submit-btn doodle-button {{askingQuestion ? 'submit-btn--question' : ''}}"
+            bindtap="{{askingQuestion ? 'onAsk' : 'onGuess'}}">
+        {{askingQuestion ? '提问' : '提交'}}
+      </view>
+    </view>
+
+    <!-- 提问模式提示文字 -->
+    <text class="feedback-text feedback-text--question" wx:if="{{askingQuestion}}">
+      请输入你的问题，或再次点击「提示」取消提问
+    </text>
+
+    <!-- 猜测历史列表（进度条，仅展示前3条） -->
+    <view class="history-head" wx:if="{{guesses.length > 0}}">
+      <view class="history-title">
+        <text>猜测记录</text>
+      </view>
+      <view class="history-more" bindtap="onOpenHistory">
+        <text>完整记录 →</text>
+      </view>
+    </view>
+
+    <scroll-view class="guess-list" scroll-y enhanced enable-flex wx:if="{{guesses.length > 0}}">
+      <view class="guess-item"
+            wx:for="{{top3Guesses}}" wx:key="word"
+            style="animation-delay: {{index * 0.05}}s">
+        <text class="guess-word pixel">{{item.word}}</text>
+        <view class="guess-bar-track">
+          <view class="guess-bar-fill" style="width:{{item.score}}%;background:{{item.barColor}};"></view>
+        </view>
+        <text class="guess-score pixel" style="color:{{item.barColor}};">{{item.scoreDisplay}}%</text>
+      </view>
+    </scroll-view>
+
+    <!-- 底部操作栏：提示 + 放弃 -->
+    <view class="bottom-bar">
+      <view class="doodle-button action-btn action-btn--hint" bindtap="onHint">
+        <text> 提示</text>
+        <text class="hint-badge" wx:if="{{!t2Used || !t3Used || !qa}}">{{3 - (t2Used ? 1 : 0) - (t3Used ? 1 : 0) - (qa ? 1 : 0)}}</text>
+      </view>
+      <view class="doodle-button action-btn action-btn--quit" bindtap="onOpenQuit"> 放弃</view>
+    </view>
+
+    <!-- 提示内容展示（依次追加） -->
+    <view wx:if="{{hints.length > 0}}">
+      <view class="history-head">
+        <view class="history-title"><text>提示</text></view>
+      </view>
+      <scroll-view class="guess-list" scroll-y enhanced enable-flex wx:if="{{hints.length > 3}}">
+        <view class="hint-card" wx:for="{{hints}}" wx:key="index">
+          <text class="hint-tag">{{item.type}}</text>
+          <text class="hint-text">{{item.text}}</text>
+        </view>
+      </scroll-view>
+      <view class="guess-list" wx:else>
+        <view class="hint-card" wx:for="{{hints}}" wx:key="index">
+          <text class="hint-tag">{{item.type}}</text>
+          <text class="hint-text">{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载遮罩 -->
+    <view class="loading-overlay" wx:if="{{loading}}">
+      <view class="loading-card">
+        <text class="loading-icon">⏳</text>
+        <text class="loading-text">{{loadingText}}</text>
+      </view>
     </view>
   </view>
 
-  <!-- 调试用：看答案按钮 -->
-  <view class="debug-area" wx:if="{{debugTarget}}">
-    <text class="debug-label"> 答案：</text>
-    <text class="debug-word">{{debugTarget}}</text>
-    <text class="debug-mode">[{{similarityMode}}]</text>
-  </view>
-  <button class="debug-btn" bindtap="onShowAnswer" wx:if="{{!debugTarget}}">🔍 看答案（调试）</button>
+</page-container>
 
-  <!-- 加载遮罩 -->
-  <view class="loading-overlay" wx:if="{{loading}}">
-    <view class="loading-card">
-      <text class="loading-icon">⏳</text>
-      <text class="loading-text">{{loadingText}}</text>
-    </view>
-  </view>
+<!-- 放弃确认弹窗：放在 .page 外部，避免 overflow:hidden 导致 fixed 定位失效 -->
+<quit-modal wx:if="{{quitOpen}}"
+            guessCount="{{guessCount}}"
+            maxScore="{{maxScore}}"
+            bind:continue="onCloseQuit"
+            bind:quit="onConfirmQuit" />
 
-  <!-- 放弃确认弹窗 -->
-  <quit-modal wx:if="{{quitOpen}}"
+<!-- 放弃结算弹窗：放在 .page 外部，避免 overflow:hidden 导致 fixed 定位失效 -->
+<giveup-modal wx:if="{{giveupOpen}}"
+              targetWord="{{giveupTarget}}"
               guessCount="{{guessCount}}"
-              maxScore="{{score}}"
-              bind:continue="onCloseQuit"
-              bind:quit="onConfirmQuit" />
+              maxScore="{{giveupMaxScore}}"
+              bind:playAgain="onGiveupPlayAgain"
+              bind:goHome="onGiveupGoHome" />
+
+<!-- 完整猜测记录弹窗：放在 .page 外部 -->
+<view class="modal-bg" wx:if="{{historyOpen}}" bindtap="onCloseHistory">
+  <view class="modal-card history-modal" catchtap>
+    <view class="history-modal-head">
+      <view class="history-modal-head-left">
+        <text class="history-modal-title">完整猜测记录</text>
+        <text class="history-modal-sub">按时间倒序</text>
+      </view>
+      <text class="history-modal-close" bindtap="onCloseHistory">✕</text>
+    </view>
+    <scroll-view class="history-modal-list" scroll-y enhanced>
+      <view class="history-row" wx:for="{{sortedGuesses}}" wx:key="word" style="animation-delay: {{index * 0.03}}s">
+        <text class="history-rank pixel">#{{index + 1}}</text>
+        <text class="history-rword pixel">{{item.word}}</text>
+        <view class="history-bar-track">
+          <view class="history-bar-fill" style="width:{{item.score}}%;background:{{item.barColor}};"></view>
+        </view>
+        <text class="history-rscore pixel" style="color:{{item.barColor}};">{{item.scoreDisplay}}%</text>
+      </view>
+    </scroll-view>
+  </view>
 </view>

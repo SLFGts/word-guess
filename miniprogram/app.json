@@ -8,7 +8,7 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#F5F0E1",
-    "navigationBarTitleText": "猜词",
+    "navigationBarTitleText": "词踪",
     "navigationBarTextStyle": "black"
   },
   "style": "v2",

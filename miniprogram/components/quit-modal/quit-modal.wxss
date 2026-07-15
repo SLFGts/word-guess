@@ -6,39 +6,50 @@
 }
 
 .quit-icon {
-  font-size: 84rpx;
+  font-size: var(--text-5xl);   /* 原型 42px ×2 = 84rpx */
   display: block;
-  margin-bottom: 14rpx;
+  margin-bottom: 14rpx;   /* 原型 7px ×2 */
 }
 
 .quit-title {
   display: block;
   text-align: center;
-  font-size: 40rpx;
+  font-size: var(--text-3xl);   /* 原型 25px ×2 = 50rpx */
   font-weight: bold;
-  margin-bottom: 14rpx;
+  margin-bottom: 6rpx;   /* 原型 3px ×2 */
 }
 
 .quit-sub {
   display: block;
-  color: #8A8578;
-  font-size: 28rpx;
-  margin-bottom: 36rpx;
+  color: var(--color-text-sub);
+  font-size: var(--text-lg);    /* 原型 15px ×2 = 30rpx */
+  margin-bottom: 36rpx;   /* 原型 18px ×2 */
 }
 
-.modal-ok {
-  width: 100%;
-  padding: 22rpx;
-  font-size: 38rpx;
+/* 按钮行：左右排列 */
+.quit-btn-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: 36rpx;
 }
 
+/* 放弃按钮：左右排列，缩小尺寸 */
 .quit-btn {
-  border: 4rpx solid #FF9EBB;
+  flex: 1;
+  padding: 18rpx 0;
+  font-size: var(--text-xl);
+  text-align: center;
+  border-radius: var(--radius-lg);
+}
+
+/* 继续按钮：橙色 */
+.quit-btn--continue {
+  background: var(--color-primary);
+}
+
+/* 放弃按钮：粉色边框 */
+.quit-btn--quit {
+  border: 4rpx solid var(--color-pink);
   background: transparent;
-  border-radius: 20rpx;
-  width: 100%;
-  padding: 18rpx;
-  margin-top: 26rpx;
-  color: #3A3A3A;
-  font-size: 32rpx;
+  color: var(--color-text);
 }

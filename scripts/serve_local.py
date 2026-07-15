@@ -88,58 +88,47 @@ def _leaks_target(text, target):
 
 
 def gen_t1_hint(target):
-    """T1 描述提示：每局点击时实时调 LLM 生成（不缓存，保证不同局结果新颖）。
-    返回一句话含词性/领域/简单形容，≤30字，不得出现目标词任何字。
-    LLM 软约束不可靠，生成后校验是否泄露目标词字，最多重试3次，仍泄露则直接返回原文不遮罩（保持可读）。"""
+    """T1 类别提示：极简短语说明词性+所属大类，≤10字，直接展示在字数下方。
+    LLM 软约束不可靠，生成后校验是否泄露目标词字，最多重试3次，仍泄露则返回 None。"""
     client = _llm_client()
     if client is None:
         return None  # 未配置 key，由调用方给降级提示
     prompt = (
-        f"你是猜词游戏的提示生成专家，非常善于引导玩家逐步猜中目标词。目标词是「{target}」。"
-        f"请给出一句提示，包含该词的词性、领域以及简单形容（如果必要）："
-        f"词性包括名词/动词/形容词/成语/网络用语等，"
-        f"领域可以说和动物/食物/植物/情感/通信/金融/体育/建筑/自然/文化/生活等有关，"
-        f"如果该词太难太生僻，可以用通俗的话形容，进一步指出方向但不能太明显。"
-        f"要求：1.共30个汉字以内；2.不得说出目标词或其近义词；"
-        f"3.不得出现目标词本身的任何一个字；"
-        f"4.对于一些明显生僻的词，可以直接点明这是一个生僻词；"
-        f"5.形容必须通俗直白，不得文言化或生僻；"
-        f"6.只输出提示本身，不得带「提示」等前缀、不得带引号序号。"
-        f"示例：「宠物店」——「一个名词，表示一类场所，和小动物有关。」"
-        f"示例：「平壤」——「一个名词，一个城市，是某个国家的首都。」"
+        f"猜词游戏的目标词是「{target}」。请给出一个极短的类别提示，说明该词的词性+所属大类。"
+        f"常见格式：「一种XX」「一种XX类XX」「亚洲国家」「中国传统乐器」。"
+        f"要求：1. 10个汉字以内；2. 不得出现目标词本身的任何一个字；"
+        f"3. 只输出短语本身，不带引号、前缀。"
     )
     last = None
-    for _ in range(3):  # 最多3次，软约束不保证，重试提高命中率
+    for _ in range(3):
         try:
             resp = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.9,
-                max_tokens=40,
+                max_tokens=20,
             )
             last = resp.choices[0].message.content.strip()
             if not _leaks_target(last, target):
-                return last  # 不含目标字，采用
+                return last
         except Exception as e:
             return f"(LLM调用失败: {e})"
-    # 3次仍含目标字：直接返回 LLM 原始输出，不做遮罩改写（保持提示可读，宁可泄露目标字也不要特殊符号）
-    return last if last else "(LLM未返回)"
+    return None
 
 
-def gen_t3_hint(target):
-    """T3 联想锚点：调 LLM 生成一个相关联想词作方向提示（不在答案池也行，玩家只作方向参考）。
-    要求相关但非同词根/变体/同义词、不含目标词任何字；LLM 软约束不可靠，生成后校验，
-    最多重试3次，仍泄露则降级用词向量过滤同词根取首个近邻（保证不含目标字）。"""
+def gen_t2_hint(target, category=""):
+    """T2 范围缩小提示：在类别基础上进一步限定范围（产地/体型/颜色/功能/时代等），≤20字。
+    LLM 软约束不可靠，生成后校验，最多重试3次，仍泄露则降级用词向量过滤取首个近邻。"""
     client = _llm_client()
     if client is None:
         return _vector_neighbor_filtered(target)  # 无 key 直接降级
+    ctx = f"目标词属于「{category}」。" if category else ""
     prompt = (
-        f"猜词游戏的目标词是「{target}」。请给出一个和它相关联的词，作为玩家的方向提示。"
-        f"要求：1.相关但不是同义词、不是变体、不与目标词共享任何字"
-        f"（例如目标词「猫」不要给「猫咪/猫猫」，可给「狗/宠物/鱼」；"
-        f"目标词「孙悟空」不要给「悟空」，可给「牛魔王/唐三藏」）；"
-        f"2.不得出现目标词本身的任何一个字；"
-        f"3.只输出这个词本身，不带引号、解释或前缀。"
+        f"猜词游戏的目标词是「{target}」。{ctx}请给出一句进一步缩小范围的提示，"
+        f"从产地、体型、颜色、材质、功能、时代、使用场景等任一角度切入，帮助玩家在知道类别后进一步缩小猜测范围。"
+        f"要求：1. 20个汉字以内；2. 不得出现目标词本身的任何一个字；3. 不得说出目标词或其近义词；"
+        f"4. 只输出提示本身，不带引号、前缀。"
+        f"示例：「常见于热带地区」「属于犬科」「多用于厨房」「诞生于唐朝」"
     )
     for _ in range(3):
         try:
@@ -157,6 +146,35 @@ def gen_t3_hint(target):
     return _vector_neighbor_filtered(target)  # 3次仍泄露，降级词向量（保证不含目标字）
 
 
+def gen_t3_hint(target):
+    """T3 特征形容提示：给出一个鲜明、具体、有辨识度的特征或细节，≤20字。
+    LLM 软约束不可靠，生成后校验，最多重试3次，仍泄露则返回 None。"""
+    client = _llm_client()
+    if client is None:
+        return None  # 无 key 返回 None
+    prompt = (
+        f"猜词游戏的目标词是「{target}」。请给出一句描述其鲜明特征或细节的提示，"
+        f"让已经知道类别和范围的玩家可以锁定答案。"
+        f"要求：1. 20个汉字以内；2. 不得出现目标词本身的任何一个字；3. 不得说出目标词或其近义词；"
+        f"4. 只输出特征描述本身，不带引号、前缀。"
+        f"示例：「果皮有刺且气味浓烈」「尾巴蓬松会竖起来」「可以拉出四种不同音高」「以竹子为食」"
+    )
+    for _ in range(3):
+        try:
+            resp = client.chat.completions.create(
+                model=LLM_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.9,
+                max_tokens=30,
+            )
+            hint = resp.choices[0].message.content.strip()
+            if hint and not _leaks_target(hint, target):
+                return hint
+        except Exception as e:
+            return f"(LLM调用失败: {e})"
+    return None
+
+
 def _vector_neighbor_filtered(target):
     """降级 T3：词向量取近邻，过滤与目标词共享任意字的变体，返回首个联想词。"""
     t_idx = WORD_INDEX[target]
@@ -170,18 +188,18 @@ def _vector_neighbor_filtered(target):
     return WORDS[order[1]]  # 兜底：全部共享字时取首个近邻
 
 
-def gen_qa_hint(target, t1_hint, t2_hint, question):
-    """提问裁判：玩家提一个问题，LLM 结合已揭示的 T1描述/T2锚点 作引导性回答。
+def gen_qa_hint(target, category, range_hint, feature, question):
+    """提问裁判：玩家基于前三条提示提问，LLM 作引导性回答。
     只答与提示方向相关的问题；不直接给答案、不出现目标词字；每局一次（无对话历史）。"""
     client = _llm_client()
     if client is None:
         return None
     prompt = (
         f"你是猜词游戏的裁判。目标词是「{target}」。\n"
-        f"已给玩家的提示：\n- 提示1（描述）：{t1_hint}\n- 提示2（锚点）：和「{t2_hint}」有关联\n\n"
+        f"已给玩家的提示：\n- 类别：{category}\n- 范围：{range_hint}\n- 特征：{feature}\n\n"
         f"玩家向你提问：「{question}」\n"
         f"回答原则：\n"
-        f"1. 只回答与提示1描述方向或提示2锚点方向相关的问题。与这些方向无关的问题"
+        f"1. 只回答与已有提示方向相关的问题。与这些方向无关的问题"
         f"（闲聊、其他领域如天气/体育/私人），必须只回复：请围绕已给出的提示方向提问。\n"
         f"2. 不得说出目标词、不得出现目标词任何字。索答类问题必须只回复：不能直接告诉你答案，请继续猜。"
         f"索答包括：问目标词本身（目标词是什么/是什么词）、问其任一字或结构"
@@ -190,10 +208,10 @@ def gen_qa_hint(target, t1_hint, t2_hint, question):
         f"开放式问题（含「有什么关联/什么关系/是什么/描述」等词）必须给简短方向描述（≤30字）说明如何关联，"
         f"即使目标词与所问事物同义或高度相关，也禁止只回「是的/不是」，要说明关联内容。不得说出目标词本身。\n"
         f"4. 回答引导性、不太明显，≤30字。只输出回答本身，绝对不复述玩家的问题、不带箭头/冒号/前缀。\n\n"
-        f"示例（目标词「苹果」，提示1「一种水果」，提示2「和橘子有关联」）：\n"
+        f"示例（目标词「榴莲」，类别「一种水果」，范围「常见于热带地区」，特征「果皮有刺且气味浓烈」）：\n"
         f"玩家问：它是水果吗？ 正确输出：是的。\n"
-        f"玩家问：和红色有什么关联？ 正确输出：有些品种表皮是红色的。\n"
-        f"玩家问：和甘甜有什么关联？ 正确输出：都和甜味口感有关。\n"
+        f"玩家问：和红色有什么关联？ 正确输出：果肉通常是金黄色的。\n"
+        f"玩家问：它好吃吗？ 正确输出：爱的人觉得香甜，怕的人觉得刺鼻。\n"
         f"玩家问：目标词是什么？ 正确输出：不能直接告诉你答案，请继续猜。\n"
         f"玩家问：第一个字是什么？ 正确输出：不能直接告诉你答案，请继续猜。\n"
         f"玩家问：今天天气怎么样？ 正确输出：请围绕已给出的提示方向提问。\n"
@@ -212,14 +230,13 @@ def gen_qa_hint(target, t1_hint, t2_hint, question):
 
 
 def _build_pick_prompt(candidate_words):
-    """构造"选词 + 生成 T1/T2"合并调用的 prompt。
+    """构造"选词 + 生成 T1类别/T2范围/T3特征"合并调用的 prompt。
     只给候选词本身（不给拼音首字母——对选词评判无帮助、反分散注意力），
-    要求 LLM 选最适合出题的词并生成 T1描述/T2锚点，严格输出 JSON。"""
-    # 候选词编号列表
+    要求 LLM 选最适合出题的词并生成三条递进提示，严格输出 JSON。"""
     cand_list = "\n".join(f"{i+1}. {w}" for i, w in enumerate(candidate_words))
     return (
         f"你是猜词游戏的设计师。下面 {len(candidate_words)} 个词是随机候选，"
-        f"请从中选出最适合作为「目标词」的一个，并为它生成两条提示。\n\n"
+        f"请从中选出最适合作为「目标词」的一个，并为它生成三条递进提示。\n\n"
         f"候选词：\n{cand_list}\n\n"
         f"【选词标准】\n"
         f"- 适合出题：词义明确、能从多个方向联想逼近、适合朋友聚会玩、有话题性\n"
@@ -228,36 +245,47 @@ def _build_pick_prompt(candidate_words):
         f"- 多样性：候选里选综合最优，不要总偏好最简单或最难的\n"
         f"- 必须回避以下不适合出题的词（即使候选里有也不要选）：\n"
         f"  · 含生僻字或繁体字的词（如「聯合」）\n"
-        f"  · 不常用的生僻成语（如「赳赳武夫」）\n"
+        f"  · 不常用的生僻成语（如「赳武夫」）\n"
         f"  · 过于口语化、像动作短语而非固定词的（如「爬起来」）\n"
         f"  · 特殊领域的专业术语（如「钢格板」）\n\n"
-        f"【生成要求】选出目标词后，同时生成两条提示：\n\n"
-        f"提示1（描述）：\n"
-        f"- 包含词性、领域，必要时加通俗形容\n"
-        f"- 30 个汉字以内\n"
+        f"【生成要求】选出目标词后，同时生成三条递进提示（从宽到窄，逐步引导玩家猜中）：\n\n"
+        f"提示1（类别）：\n"
+        f"- 用极简短语说明目标词的词性+所属大类，让玩家一眼知道方向\n"
+        f"- 常见格式：「一种XX」「一种XX类XX」「亚洲国家」「中国传统乐器」\n"
+        f"- 10个汉字以内\n"
         f"- 不得出现目标词本身的任何一个字\n"
-        f"- 不得说出目标词或其近义词；生僻词可点明「这是一个生僻词」\n"
-        f"- 通俗直白，不文言化\n"
-        f"- 只输出描述本身，不带「提示」前缀、引号、序号\n\n"
-        f"提示2（锚点）：\n"
-        f"- 给一个和目标词相关联的词，作方向提示\n"
-        f"- 相关但不是同义词、不是变体、不与目标词共享任何一个字\n"
-        f"- 只输出这个词本身，不带引号、解释或前缀\n\n"
+        f"- 只输出短语本身，不带引号、前缀\n\n"
+        f"提示2（范围）：\n"
+        f"- 在类别基础上进一步缩小范围，从产地、体型、颜色、材质、功能、时代、使用场景等任一角度切入\n"
+        f"- 示例：「常见于热带地区」「属于犬科」「多用于厨房」「诞生于唐朝」\n"
+        f"- 20个汉字以内\n"
+        f"- 不得出现目标词本身的任何一个字\n"
+        f"- 不得说出目标词或其近义词\n"
+        f"- 只输出范围描述本身，不带引号、前缀\n\n"
+        f"提示3（特征）：\n"
+        f"- 给出一个鲜明、具体、有辨识度的特征或细节，让已经缩小范围的玩家可以锁定答案\n"
+        f"- 示例：「果皮有刺且气味浓烈」「尾巴蓬松会竖起来」「可以拉出四种不同音高」「以竹子为食」\n"
+        f"- 20个汉字以内\n"
+        f"- 不得出现目标词本身的任何一个字\n"
+        f"- 不得说出目标词或其近义词\n"
+        f"- 只输出特征描述本身，不带引号、前缀\n\n"
+        f"三条提示必须形成「类别→范围→特征」的递进漏斗，后一条比前一条更接近答案。\n\n"
         f"【输出格式】严格按以下 JSON 输出，不要输出其他任何内容：\n"
         "{\n"
         '  "chosen": "选中的目标词（必须是上面候选之一，原样）",\n'
         '  "reason": "一句话选词理由，20字内",\n'
-        '  "t1": "T1描述提示",\n'
-        '  "anchor": "T2锚点词"\n'
+        '  "t1": "类别提示（≤10字）",\n'
+        '  "t2": "范围提示（≤20字）",\n'
+        '  "t3": "特征提示（≤20字）"\n'
         "}"
     )
 
 
 def smart_pick_target(candidate_words):
-    """一次 LLM 调用：选最适合出题的词 + 生成 T1 描述 + T2 锚点。
-    返回 (target, t1, anchor) 或 None（全部失败走纯随机）。
-    t1/anchor 各自可能为 None（泄露/空时），不影响选词成功——
-    点提示时若该级缓存为 None，走原 gen_t1_hint/gen_t3_hint 实时生成兜底。"""
+    """一次 LLM 调用：选最适合出题的词 + 生成 T1类别/T2范围/T3特征。
+    返回 (target, t1, t2, t3) 或 None（全部失败走纯随机）。
+    t1/t2/t3 各自可能为 None（泄露/空时），不影响选词成功——
+    点提示时若该级缓存为 None，走原 gen_t1_hint/gen_t2_hint/gen_t3_hint 实时生成兜底。"""
     client = _llm_client()
     if client is None:
         return None  # 未配置 key → 调用方走纯随机（即现状）
@@ -268,19 +296,21 @@ def smart_pick_target(candidate_words):
                 model=LLM_MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.8,
-                max_tokens=300,  # 合并输出 chosen+reason+t1+anchor，200 偏紧会截断
+                max_tokens=400,  # 合并输出 chosen+reason+t1+t2+t3
                 response_format={"type": "json_object"},  # qwen-turbo 经百炼兼容模式支持
             )
             result = json.loads(resp.choices[0].message.content.strip())
             chosen = result.get("chosen", "")
             if chosen not in candidate_words:
                 continue  # chosen 不在候选（幻觉），重试
-            # t1/anchor 各自独立校验：泄露目标字/空/超长 → 置 None，点提示时走原 gen 函数兜底
+            # t1/t2/t3 各自独立校验：泄露目标字/空/超长 → 置 None，点提示时走原 gen 函数兜底
             t1 = result.get("t1", "")
-            t1 = t1 if (t1 and len(t1) <= 60 and not _leaks_target(t1, chosen)) else None
-            anchor = result.get("anchor", "")
-            anchor = anchor if (anchor and not _leaks_target(anchor, chosen)) else None
-            return chosen, t1, anchor
+            t1 = t1 if (t1 and len(t1) <= 20 and not _leaks_target(t1, chosen)) else None
+            t2 = result.get("t2", "")
+            t2 = t2 if (t2 and len(t2) <= 30 and not _leaks_target(t2, chosen)) else None
+            t3 = result.get("t3", "")
+            t3 = t3 if (t3 and len(t3) <= 30 and not _leaks_target(t3, chosen)) else None
+            return chosen, t1, t2, t3
         except Exception:
             continue
     return None  # 2 次失败 → 调用方走纯随机
@@ -360,19 +390,19 @@ class Handler(BaseHTTPRequestHandler):
             params = {}
 
         if path == "/new_game":
-            # 智能选词：抽 5 候选 → 一次 LLM 调用选最适合出题的词 + 预生成 T1/T2
-            # 失败/无 key 降级为纯随机（即原行为）；预生成的 t1/t3 存缓存供点提示时秒返
+            # 智能选词：抽 5 候选 → 一次 LLM 调用选最适合出题的词 + 预生成 T1/T2/T3
+            # 失败/无 key 降级为纯随机（即原行为）；预生成的 t1/t2/t3 存缓存供点提示时秒返
             candidates = random.sample(WORDS_PLAYABLE, min(5, len(WORDS_PLAYABLE)))
             pick = smart_pick_target(candidates)
             if pick is not None:
-                target, pre_t1, pre_anchor = pick
+                target, pre_t1, pre_t2, pre_t3 = pick
             else:
-                target, pre_t1, pre_anchor = random.choice(WORDS_PLAYABLE), None, None
+                target, pre_t1, pre_t2, pre_t3 = random.choice(WORDS_PLAYABLE), None, None, None
             rankings = compute_rankings(target)
             game_id = str(random.randint(10000, 99999))
-            # t1/t3 预生成成功则填入（点提示命中缓存秒返）；失败保持 None，点提示走原 gen 函数兜底
+            # t1/t2/t3 预生成成功则填入（点提示命中缓存秒返）；失败保持 None，点提示走原 gen 函数兜底
             games[game_id] = {"target": target, "rankings": rankings,
-                              "t1": pre_t1, "t3": pre_anchor, "qa": None}
+                              "t1": pre_t1, "t2": pre_t2, "t3": pre_t3, "qa": None}
             # 字数开局默认给出（原 T2 结构提示前置到开局基础信息）
             meta = WORD_META.get(target, {})
             self._send_json({"gameId": game_id, "wordCount": len(WORDS), "len": meta.get("len", "?")})
@@ -404,36 +434,42 @@ class Handler(BaseHTTPRequestHandler):
                 return
             game = games[game_id]
             target = game["target"]
-            # level 语义：1=描述提示(T1)、2=联想锚点(T3，原三级里的 T3 重定义为 2)
-            # 每局每级只生成一次：首次调用生成并回填 game，重复调用直接返回已存结果（防直接 POST 重复调 LLM）
+            # 新 4 层提示系统：
+            # T1 类别：直接展示在 UI（预生成），不通过此接口
+            # Level 1 → T2 范围提示（按钮1）
+            # Level 2 → T3 特征提示（按钮2）
+            # Level 3 → T4 问答（按钮3，进入提问模式）
             if level == 1:
-                # T1 描述：每局一次，首次实时调 LLM 生成（不缓存跨局，保证新颖）
-                if game["t1"] is None:
-                    game["t1"] = gen_t1_hint(target)
-                hint_text = game["t1"]
+                # T2 范围缩小：每局一次，首次调 LLM 生成
+                if game["t2"] is None:
+                    game["t2"] = gen_t2_hint(target, game.get("t1", ""))
+                hint_text = game["t2"]
                 if hint_text is None:
                     self._send_json({"hint": "未配置 LLM_API_KEY（复制 .env.example 为 .env 填 key 后重启）"})
                 else:
                     self._send_json({"hint": hint_text, "used": True})
             elif level == 2:
-                # T3 联想锚点：每局一次，首次调 LLM 生成联想方向词（不在答案池也行）
+                # T3 特征形容：每局一次，首次调 LLM 生成
                 if game["t3"] is None:
                     game["t3"] = gen_t3_hint(target)
-                self._send_json({"hint": f"和「{game['t3']}」有关联", "used": True})
+                hint_text = game["t3"]
+                if hint_text is None:
+                    self._send_json({"hint": "未配置 LLM_API_KEY（复制 .env.example 为 .env 填 key 后重启）"})
+                else:
+                    self._send_json({"hint": hint_text, "used": True})
             elif level == 3:
-                # 提问裁判：须先解锁 T1描述+T2锚点，每局一次（玩家只有1次提问机会）
-                if game["t1"] is None or game["t3"] is None:
-                    self._send_json({"answer": "请先查看提示1和提示2，再向裁判提问。"})
+                # T4 提问裁判：须已有 T1+T2+T3 三条提示，每局一次
+                if game["t1"] is None or game["t2"] is None or game["t3"] is None:
+                    self._send_json({"answer": "请先查看全部提示，再向裁判提问。"})
                     return
                 if game.get("qa") is not None:
-                    # 每局一次，已提问过：返回已有回答，不再调 LLM
                     self._send_json({"answer": game["qa"], "used": True})
                     return
                 question = (params.get("question") or "").strip()
                 if not question:
                     self._send_json({"error": "提问内容不能为空"}, 400)
                     return
-                answer = gen_qa_hint(target, game["t1"], game["t3"], question)
+                answer = gen_qa_hint(target, game["t1"], game["t2"], game["t3"], question)
                 if answer is None:
                     self._send_json({"answer": "未配置 LLM_API_KEY（复制 .env.example 为 .env 填 key 后重启）"})
                 else:

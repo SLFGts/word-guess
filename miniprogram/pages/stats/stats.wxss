@@ -2,17 +2,17 @@
 /* 轻松像素涂鸦风格统计页 */
 
 .stats-page {
-  padding-top: 36rpx;
-}
-
-.nav-title {
-  font-size: 34rpx;
-  font-weight: bold;
 }
 
 /* 游戏概览 */
 .stats-overview {
   padding: 30rpx 26rpx;
+}
+
+.overview-title {
+  font-size: 38rpx;
+  font-weight: bold;
+  margin: 0 0 24rpx;
 }
 
 .section-heading {
@@ -27,9 +27,14 @@
 .section-link {
   border: 0;
   background: transparent;
-  color: #638CC8;
+  color: var(--color-link);
   font-size: 26rpx;
+  font-weight: normal;
   padding: 0;
+}
+
+.section-link::after {
+  display: none;
 }
 
 .stat-row {
@@ -50,20 +55,20 @@
 }
 
 .stat-num {
-  font-size: 34rpx;
+  font-size: var(--text-xl);
   display: block;
   margin-top: 6rpx;
   font-weight: bold;
 }
 
 .stat-suffix {
-  font-size: 18rpx;
+  font-size: var(--text-xs);
   font-family: "ZCOOL", sans-serif;
 }
 
 .stat-label {
   font-size: 20rpx;
-  color: #8A8578;
+  color: var(--color-text-sub);
   display: block;
   margin-top: 4rpx;
 }
@@ -76,7 +81,10 @@
   align-items: center;
   padding: 24rpx 26rpx;
   margin-top: 36rpx;
-  background: #D4F5D0;
+  background: var(--color-mint);
+  box-shadow: 8rpx 8rpx 0 var(--color-shadow);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-xl);
 }
 
 .challenge-info {
@@ -86,29 +94,30 @@
 }
 
 .challenge-title {
-  font-size: 34rpx;
+  font-size: var(--text-xl);
   font-weight: bold;
 }
 
 .challenge-sub {
   color: #6D786B;
-  font-size: 22rpx;
+  font-size: var(--text-sm);
 }
 
 .challenge-day {
   font-size: 36rpx;
-  color: #75B475;
+  color: var(--color-green-deep);
   text-align: right;
 }
 
 .challenge-day-sub {
-  font-size: 16rpx;
+  font-size: var(--text-2xs);
 }
 
 .challenge-btn {
   grid-column: 1 / -1;
   padding: 16rpx;
-  font-size: 30rpx;
+  background: var(--color-primary);
+  font-size: var(--text-lg);
   margin-top: 8rpx;
 }
 
@@ -120,9 +129,9 @@
 }
 
 .badge {
-  border: 4rpx solid #3A3A3A;
+  border: 4rpx solid var(--color-border);
   border-radius: 24rpx;
-  background: #FFF8EE;
+  background: var(--color-card);
   text-align: center;
   padding: 18rpx 6rpx;
 }
@@ -135,12 +144,18 @@
 
 .badge-name {
   font-size: 20rpx;
-  font-weight: bold;
 }
 
 .badge.locked {
-  filter: grayscale(1);
-  opacity: 0.45;
+  filter: grayscale(0.7);
+  opacity: 0.55;
+}
+
+.badge.locked .badge-icon::after {
+  content: "";
+  font-size: 24rpx;
+  position: relative;
+  margin-left: -20rpx;
 }
 
 /* 最近游戏 */
@@ -158,8 +173,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 26rpx;
-  border-width: 4rpx;
+  border: 4rpx solid var(--color-border);
   border-radius: 24rpx;
+  box-shadow: var(--shadow-sm);
+  /* 可点击反馈 */
+  transition: background 0.12s;
+}
+
+.game-row:active {
+  background: var(--color-card-hover, #EDE8D8);
 }
 
 .game-row-left {
@@ -174,8 +196,8 @@
 }
 
 .game-date {
-  color: #8A8578;
-  font-size: 22rpx;
+  color: var(--color-text-sub);
+  font-size: var(--text-sm);
 }
 
 .game-row-right {
@@ -186,28 +208,223 @@
   align-items: flex-end;
 }
 
+.game-tags {
+  display: flex;
+  gap: 10rpx;
+  align-items: center;
+}
+
 .game-count-tag {
-  font-size: 22rpx;
-  background: #FFCF81;
-  border: 2rpx solid #3A3A3A;
-  border-radius: 10rpx;
+  font-size: var(--text-sm);
+  background: var(--color-tag);
+  border: 2rpx solid var(--color-border);
+  border-radius: var(--radius-xs);
   padding: 6rpx 10rpx;
   display: inline-block;
 }
 
+.game-count-tag.game-gaveup {
+  background: var(--color-bg);
+  color: var(--color-text-sub);
+  border: 2rpx dashed var(--color-border);
+}
+
+.game-hint-tag {
+  font-size: 20rpx;
+  color: var(--color-primary);
+  background: var(--color-cream);
+  border: 2rpx solid var(--color-primary);
+  border-radius: var(--radius-xs);
+  padding: 4rpx 8rpx;
+  display: inline-block;
+}
+
 .game-time {
-  font-size: 22rpx;
-  color: #8A8578;
+  font-size: var(--text-sm);
+  color: var(--color-text-sub);
 }
 
 /* 清除按钮 */
 .clear-button {
   display: block;
   margin: 42rpx auto 0;
-  border: 4rpx dashed #FF9EBB;
+  border: 4rpx dashed var(--color-pink);
   background: transparent;
   border-radius: 18rpx;
   padding: 14rpx 30rpx;
-  color: #AA5970;
-  font-size: 28rpx;
+  color: var(--color-danger);
+  font-size: var(--text-md);
+  transition: background 0.12s, color 0.12s;
+}
+
+.clear-button:active {
+  background: var(--color-pink);
+  color: var(--color-card);
+}
+
+/* ========== 游戏详情弹窗 ========== */
+.detail-modal {
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 弹窗头部 */
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  flex-shrink: 0;
+}
+
+.detail-head-left {
+  flex: 1;
+}
+
+.detail-word {
+  font-size: var(--text-3xl);
+  font-weight: bold;
+  display: block;
+  line-height: var(--leading-tight);
+  color: var(--color-primary);
+}
+
+.detail-sub {
+  font-size: var(--text-sm);
+  color: var(--color-text-sub);
+  margin-top: 6rpx;
+  display: block;
+}
+
+.detail-close {
+  font-size: var(--text-2xl);
+  font-weight: bold;
+  color: var(--color-text-sub);
+  line-height: 1;
+  padding: 8rpx;
+  flex-shrink: 0;
+}
+
+/* 三宫格成绩 */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rpx;
+  border: 4rpx dashed var(--color-text-sub);
+  margin-bottom: var(--space-4);
+}
+
+.detail-metric {
+  text-align: center;
+  padding: 20rpx 10rpx;
+  border: 4rpx dashed var(--color-text-sub);
+}
+
+.detail-metric-num {
+  display: block;
+  font-size: var(--text-2xl);
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.detail-metric-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-sub);
+  display: block;
+  margin-top: 4rpx;
+}
+
+/* 分区标题 */
+.detail-section {
+  margin-bottom: var(--space-4);
+}
+
+.detail-section-title {
+  font-size: var(--text-lg);
+  font-weight: bold;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+/* 提示列表 */
+.detail-hint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.detail-hint-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 14rpx 18rpx;
+  background: var(--color-card);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  gap: 14rpx;
+}
+
+.detail-hint-type {
+  font-size: var(--text-sm);
+  font-weight: bold;
+  background: var(--color-blue);
+  color: var(--color-on-accent);
+  padding: 4rpx 12rpx;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.detail-hint-text {
+  flex: 1;
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+}
+
+/* 猜测记录列表 */
+.detail-guess-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  max-height: 300rpx;
+  overflow-y: auto;
+}
+
+.detail-guess-item {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.detail-guess-order {
+  font-size: var(--text-sm);
+  color: var(--color-text-sub);
+  min-width: 40rpx;
+  flex-shrink: 0;
+}
+
+.detail-guess-bar-track {
+  flex: 1;
+  height: 18rpx;
+  border: 3rpx solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bar-track);
+  overflow: hidden;
+}
+
+.detail-guess-bar-fill {
+  height: 100%;
+  display: block;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+.detail-guess-score {
+  font-size: var(--text-sm);
+  font-weight: bold;
+  min-width: 60rpx;
+  text-align: right;
+  flex-shrink: 0;
+  color: var(--color-text);
 }

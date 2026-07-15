@@ -2,38 +2,29 @@
 <!-- 轻松像素涂鸦风格统计页 -->
 
 <view class="page stats-page">
-  <!-- 导航栏 -->
-  <view class="nav">
-    <button class="nav-back" bindtap="onGoBack">←</button>
-    <text class="nav-title">我的统计</text>
-    <text class="star" style="top:0;right:0;color:#C9A8E8;">✦</text>
-  </view>
-
   <!-- 游戏概览卡片 -->
   <view class="stats-overview doodle-card">
-    <view class="section-heading">
-      <text>◆ 游戏概览</text>
-    </view>
+    <view class="overview-title">◆ 数据概览</view>
     <view class="stat-row">
       <view class="stat-item">
         <text class="stat-icon">🎮</text>
-        <text class="stat-num pixel" style="color:#FFB347;">{{totalGames}}</text>
-        <text class="stat-label">总游戏数</text>
+        <text class="stat-num pixel" style="color:var(--color-primary);">{{totalGames}}</text>
+        <text class="stat-label">总游戏场次</text>
       </view>
       <view class="stat-item">
         <text class="stat-icon">⭐</text>
-        <text class="stat-num pixel" style="color:#A8E6A3;">{{winRate}}<text class="stat-suffix">%</text></text>
+        <text class="stat-num pixel" style="color:var(--color-green-deep);">{{winRate}}<text class="stat-suffix">%</text></text>
         <text class="stat-label">胜率</text>
       </view>
       <view class="stat-item">
         <text class="stat-icon">🎯</text>
-        <text class="stat-num pixel" style="color:#A3C4F3;">{{avgGuesses}}</text>
-        <text class="stat-label">平均猜测</text>
+        <text class="stat-num pixel" style="color:var(--color-blue-deep);">{{avgGuesses}}</text>
+        <text class="stat-label">平均猜测次数</text>
       </view>
       <view class="stat-item">
-        <text class="stat-icon">🔥</text>
-        <text class="stat-num pixel" style="color:#C9A8E8;">{{streakDays}}</text>
-        <text class="stat-label">连续天数</text>
+        <text class="stat-icon">⏱</text>
+        <text class="stat-num pixel" style="color:var(--color-purple);">{{avgTimeDisplay}}</text>
+        <text class="stat-label">平均用时</text>
       </view>
     </view>
   </view>
@@ -41,17 +32,17 @@
   <!-- 每日挑战 -->
   <view class="challenge doodle-card">
     <view class="challenge-info">
-      <text class="challenge-title"> 每日挑战</text>
+      <text class="challenge-title">🌱 每日挑战</text>
       <text class="challenge-sub">第 {{challengeDay}} 天 · 连胜中！</text>
     </view>
     <text class="challenge-day pixel">{{challengeDay}} <text class="challenge-day-sub">DAY</text></text>
-    <button class="doodle-button challenge-btn" bindtap="onChallenge">去挑战 ▶</button>
+    <view class="doodle-button challenge-btn" bindtap="onChallenge">去挑战 ▶</view>
   </view>
 
   <!-- 成就徽章 -->
   <view class="section-heading">
-    <text>🏅 成就徽章</text>
-    <button class="section-link">查看全部 →</button>
+    <text>成就徽章</text>
+    <view class="section-link" bindtap="onViewAll" data-type="badges">查看全部 →</view>
   </view>
   <view class="badges">
     <view class="badge {{item.unlocked ? '' : 'locked'}}" wx:for="{{badges}}" wx:key="name">
@@ -62,22 +53,82 @@
 
   <!-- 最近游戏 -->
   <view class="section-heading recent-head">
-    <text>📝 最近游戏</text>
-    <button class="section-link">查看全部</button>
+    <text>最近游戏</text>
+    <view class="section-link" bindtap="onViewAll" data-type="history">查看全部</view>
   </view>
   <view class="history-stats">
-    <view class="game-row doodle-card" wx:for="{{recentGames}}" wx:key="word">
+    <view class="game-row doodle-card"
+          wx:for="{{recentGames}}" wx:key="word"
+          bindtap="onGameTap" data-idx="{{index}}">
       <view class="game-row-left">
         <text class="game-word">{{item.word}}</text>
         <text class="game-date">{{item.date}}</text>
       </view>
       <view class="game-row-right">
-        <text class="game-count-tag">{{item.count}} 次猜中</text>
+        <view class="game-tags">
+          <text class="game-count-tag {{item.won ? '' : 'game-gaveup'}}">{{item.won ? item.count + ' 次猜中' : '已放弃'}}</text>
+          <text class="game-hint-tag" wx:if="{{item.hintCount > 0}}">{{item.hintCount}} 条提示</text>
+        </view>
         <text class="game-time">{{item.time}}</text>
       </view>
     </view>
   </view>
 
   <!-- 清除记录按钮 -->
-  <button class="clear-button" bindtap="onClearHistory">清除记录 ️</button>
+  <view class="clear-button" bindtap="onClearHistory">清除记录</view>
+</view>
+
+<!-- 游戏详情弹窗：放在 .page 外部，避免 overflow:hidden 导致 fixed 失效 -->
+<view class="modal-bg" wx:if="{{detailOpen}}" bindtap="onCloseDetail">
+  <view class="modal-card detail-modal" catchtap>
+    <!-- 弹窗头部 -->
+    <view class="detail-head">
+      <view class="detail-head-left">
+        <text class="detail-word">{{detailGame.word}}</text>
+        <text class="detail-sub">{{detailGame.date}} · {{detailGame.won ? '猜中' : '放弃'}}</text>
+      </view>
+      <text class="detail-close" bindtap="onCloseDetail">✕</text>
+    </view>
+
+    <!-- 四宫格成绩 -->
+    <view class="detail-grid">
+      <view class="detail-metric">
+        <text class="detail-metric-num pixel">{{detailGame.count}}</text>
+        <text class="detail-metric-label">次猜测</text>
+      </view>
+      <view class="detail-metric">
+        <text class="detail-metric-num pixel">{{detailGame.time}}</text>
+        <text class="detail-metric-label">总用时</text>
+      </view>
+      <view class="detail-metric">
+        <text class="detail-metric-num pixel">{{detailGame.hintUsed}}</text>
+        <text class="detail-metric-label">提示</text>
+      </view>
+    </view>
+
+    <!-- 提示内容列表 -->
+    <view class="detail-section" wx:if="{{detailGame.hints.length > 0}}">
+      <text class="detail-section-title">💡 提示记录</text>
+      <view class="detail-hint-list">
+        <view class="detail-hint-item" wx:for="{{detailGame.hints}}" wx:key="index">
+          <text class="detail-hint-type">{{item.type}}</text>
+          <text class="detail-hint-text">{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 猜测记录 -->
+    <view class="detail-section">
+      <text class="detail-section-title">🎯 猜测记录</text>
+      <view class="detail-guess-list">
+        <view class="detail-guess-item" wx:for="{{detailGame.guessRecords}}" wx:key="order">
+          <text class="detail-guess-order">#{{item.order}}</text>
+          <view class="detail-guess-bar-track">
+            <view class="detail-guess-bar-fill" style="width:{{item.score}}%;"></view>
+          </view>
+          <text class="detail-guess-score">{{item.score}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>

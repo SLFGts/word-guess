@@ -6,8 +6,10 @@
     <text class="giveup-icon">💪</text>
     <text class="giveup-title">差一点就猜到了！</text>
     <text class="giveup-answer">答案是：<text class="giveup-word">{{targetWord}}</text></text>
-    <text class="giveup-stats">猜测 {{guessCount}} 次 · 最高分 {{maxScore}}%</text>
-    <button class="doodle-button modal-ok" bindtap="onPlayAgain">再来一局 ▶</button>
-    <button class="giveup-home-btn" bindtap="onGoHome">返回首页 🏠</button>
+    <text class="giveup-stats">猜测 {{guessCount}} 次 · 最高分 {{maxScoreDisplay}}%</text>
+    <view class="giveup-btn-row">
+      <view class="giveup-btn doodle-button" bindtap="onPlayAgain">再来一局 ▶</view>
+      <view class="giveup-btn giveup-btn--home" bindtap="onGoHome">返回首页 🏠</view>
+    </view>
   </view>
 </view>

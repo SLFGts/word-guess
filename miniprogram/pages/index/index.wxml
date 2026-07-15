@@ -1,57 +1,56 @@
 <!--pages/index/index.wxml-->
-<!-- 轻松像素涂鸦风格首页：认知 + 决策 -->
+<!-- 卡通刺猬风格首页：刺猬放大呼吸版
+     结构：标题区(词踪+周围散落装饰) + 副标题+波浪 → 大刺猬(呼吸跳动) → 开始按钮+引导 → 双入口卡片
+     保留刺猬为绝对主体；动效：刺猬呼吸 + 主按钮脉冲；装饰图案轻浮动 -->
 
 <view class="page home-page">
-  <!-- 装饰星星 -->
-  <text class="star" style="top:92rpx;left:60rpx;"></text>
-  <text class="star" style="top:156rpx;right:76rpx;color:#C9A8E8;">◆</text>
+  <!-- 标题区：词踪 + 副标题引导 + 波浪分隔
+       装饰浮在标题四周（home-header 为 relative 定位参照） -->
+  <view class="home-header">
+    <!-- 装饰散布：像素图案，围绕标题紧密散落 -->
+    <text class="deco deco-a">✦</text>
+    <text class="deco deco-b">◆</text>
+    <text class="deco deco-d">●</text>
+    <text class="deco deco-e">✧</text>
+    <text class="deco deco-f">◆</text>
 
-  <!-- 顶部标题区 -->
-  <view class="home-top">
-    <view class="logo"><text class="logo-guess">猜</text><text class="logo-word">词</text></view>
-    <text class="home-subtitle">输入一个词，看看离答案有多远~</text>
-  </view>
-
-  <!-- 核心操作区 -->
-  <button class="doodle-button start-button" bindtap="onQuickStart">快速开始 <text class="pixel">▶</text></button>
-  <text class="start-note">点击开始一场猜词冒险</text>
-
-  <!-- 最近战绩（蔡加尼克效应钩子） -->
-  <view class="recent doodle-card" wx:if="{{recentGame}}">
-    <text class="recent-icon">✏️</text>
-    <text class="recent-text">最近：<text class="recent-word">{{recentGame.word}}</text> · {{recentGame.count}} 次猜中 · {{recentGame.time}}</text>
-    <text class="recent-star">⭐</text>
-  </view>
-  <view class="recent doodle-card" wx:else>
-    <text class="recent-icon">✏️</text>
-    <text class="recent-text recent-empty">还没有记录，快来第一局！</text>
-    <text class="recent-star">⭐</text>
-  </view>
-
-  <!-- 模式选择区 -->
-  <view class="section-heading">
-    <text class="section-title">◆ 选择模式</text>
-    <button class="section-link" bindtap="onGoStats">我的战绩 →</button>
-  </view>
-
-  <scroll-view class="mode-scroll" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
-    <view class="mode-card" style="background:{{item.color}}" wx:for="{{modes}}" wx:key="title" bindtap="onSelectMode" data-mode="{{item.mode}}">
-      <text class="mode-icon">{{item.icon}}</text>
-      <text class="mode-tag" wx:if="{{item.tag}}">{{item.tag}}</text>
-      <text class="mode-title">{{item.title}}</text>
-      <text class="mode-desc">{{item.text}}</text>
+    <view class="home-title">
+      <text class="logo-guess">词</text>
+      <text class="logo-word">踪</text>
     </view>
-  </scroll-view>
+  </view>
+  <text class="home-subtitle">循着语义的踪迹，</text>
+  <text class="home-subtitle">找到藏起来的那个词。</text>
+  <view class="wave home-wave">〰〰〰〰〰〰〰〰〰〰</view>
 
-  <!-- 规则说明折叠面板 -->
-  <button class="rules-trigger" bindtap="onOpenRules"> 玩法规则 <text class="rules-arrow">⌄</text></button>
+  <!-- 刺猬舞台：刺猬主体放大 + 呼吸跳动动效（去草地、去问号气泡） -->
+  <view class="hedgehog-stage">
+    <image class="hedgehog-img hedgehog-bounce" src="https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/images/hedgehog.png" mode="aspectFit" />
+  </view>
 
-  <!-- 波浪线装饰 -->
-  <view class="wave">〰〰〰〰〰〰〰〰〰〰〰</view>
+  <!-- 开始游戏主按钮（纯 bindtap 用 view，坑 4.9；引导语融入按钮内部） -->
+  <view class="doodle-button start-button" bindtap="onQuickStart">
+    <text class="start-main">开始游戏 <text class="pixel">▶</text></text>
+    <text class="start-sub">点击开始一场猜词冒险~</text>
+  </view>
 
-  <!-- 右下角装饰 -->
-  <text class="star" style="bottom:64rpx;right:64rpx;color:#A3C4F3;">✦</text>
+  <!-- 底部双入口卡片 -->
+  <view class="bottom-actions">
+    <view class="action-btn" bindtap="onGoStats">
+      <text class="action-icon">🏆</text>
+      <text class="action-label">历史战绩</text>
+    </view>
+    <view class="action-btn" bindtap="onOpenRules">
+      <text class="action-icon">📖</text>
+      <text class="action-label">玩法规则</text>
+    </view>
+  </view>
 
-  <!-- 规则弹窗 -->
-  <rules-modal wx:if="{{rulesOpen}}" rules="{{rules}}" bind:close="onCloseRules" />
+  <!-- 角落像素装饰保留 -->
+  <text class="star star-tl">✦</text>
+  <text class="star star-tr">◆</text>
+  <text class="star star-br"></text>
 </view>
+
+<!-- 规则弹窗：放在 .page 外层（坑 4.4：fixed 弹窗不能嵌在 overflow:hidden 的 .page 内） -->
+<rules-modal wx:if="{{rulesOpen}}" bind:close="onCloseRules" />

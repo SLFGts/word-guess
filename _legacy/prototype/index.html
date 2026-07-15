@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>猜词原型</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; color: #333; }
+  h1 { font-size: 24px; }
+  #status { color: #666; margin: 8px 0 16px; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  input { font-size: 18px; padding: 10px; flex: 1; border: 1px solid #ccc; border-radius: 6px; }
+  button { font-size: 16px; padding: 10px 18px; border: none; border-radius: 6px; background: #4a90d9; color: #fff; cursor: pointer; }
+  button:hover { background: #357abd; }
+  button:disabled { background: #ccc; color: #999; cursor: not-allowed; }
+  #score { font-size: 56px; font-weight: bold; margin: 16px 0; text-align: center; transition: color 0.3s; }
+  .hint-row { margin: 16px 0; }
+  .hint { background: #fffbe6; padding: 8px 12px; margin: 4px 0; border-left: 4px solid #faad14; border-radius: 4px; }
+  #history { margin-top: 24px; }
+  .guess-item { padding: 6px 12px; margin: 4px 0; border-radius: 4px; display: flex; justify-content: space-between; }
+  .guess-item.best { border: 2px solid #ff6b6b; font-weight: bold; }
+  .history-title { color: #999; font-size: 14px; margin-bottom: 8px; }
+  #score-hint { text-align: center; color: #888; font-size: 16px; margin-top: -8px; margin-bottom: 8px; min-height: 20px; }
+  .new-high { color: #ff6b6b; font-size: 18px; margin-left: 8px; animation: flash 1s ease-in-out 2; }
+  @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+<h1>🎯 猜词原型</h1>
+<p id="status">目标词已选好，开始猜吧（输入词看相关度，100 = 猜中）</p>
+<div class="input-row">
+  <input id="word" placeholder="输入猜测词" autofocus>
+  <button onclick="guess()">猜</button>
+</div>
+<div id="score"></div>
+<div id="score-hint"></div>
+<div class="hint-row">
+  <button id="hint1" onclick="hint(1)">提示1 描述</button>
+  <button id="hint2" onclick="hint(2)">提示2 锚点</button>
+  <button onclick="reveal()" style="background:#aaa;">查看答案（调试）</button>
+</div>
+<div class="qa-row" style="display:flex; gap:8px; margin:16px 0;">
+  <input id="question" placeholder="向裁判提一个问题（需先看提示1和2）" style="font-size:16px; padding:8px;">
+  <button id="hint3" onclick="askJudge()" style="white-space:nowrap;">提问裁判</button>
+</div>
+<div id="hints"></div>
+<div id="history">
+  <div class="history-title">猜测历史（按时间倒序）</div>
+</div>
+
+<script>
+let gameId = null;
+let guesses = [];      // 猜测历史：{word, score, order}
+let orderCounter = 0;  // 有效猜测序号计数（重复词不消耗）
+let maxScore = -1;     // 当前局最高分（新高分提示 + 最高分高亮用）
+
+// 开新局：POST /new_game
+async function newGame() {
+  document.getElementById('status').textContent = '正在出题，请稍候…';  // 开局 LLM 选词+生成提示期间给加载反馈
+  const r = await fetch('/new_game', {method: 'POST'}).then(r => r.json());
+  gameId = r.gameId;
+  document.getElementById('status').textContent = `目标词已选好（${r.len} 个字，${r.wordCount} 词库），开始猜`;
+  document.getElementById('score').textContent = '';
+  document.getElementById('score-hint').textContent = '';
+  document.getElementById('hints').innerHTML = '';
+  guesses = [];
+  orderCounter = 0;
+  maxScore = -1;  // 开新局重置最高分
+  document.getElementById('history').innerHTML = '<div class="history-title">猜测历史（按相关度降序）</div>';
+  document.getElementById('word').value = '';
+  // 重置提示按钮：每局每级可点一次，开新局时恢复可用
+  for (const id of ['hint1','hint2','hint3']) {
+    const b = document.getElementById(id);
+    if (b) b.disabled = false;
+  }
+  const qInput = document.getElementById('question');
+  if (qInput) { qInput.disabled = false; qInput.value = ''; }
+  document.getElementById('word').focus();
+}
+
+// 猜词：POST /guess
+async function guess() {
+  const word = document.getElementById('word').value.trim();
+  if (!word || !gameId) return;
+  const r = await fetch('/guess', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({gameId, word})
+  }).then(r => r.json());
+  if (r.score === null) {
+    document.getElementById('score').textContent = r.message;
+    document.getElementById('score').style.color = '#999';
+    document.getElementById('score-hint').textContent = '';
+    return;
+  }
+  // 分数显示（颜色：低分冷蓝→高分热红，色相 (100-score)*2.4：0分→蓝240, 100分→红0）
+  const scoreEl = document.getElementById('score');
+  const hintEl = document.getElementById('score-hint');
+  scoreEl.style.color = `hsl(${(100 - r.score) * 2.4}, 70%, 45%)`;
+  // 新高分提示：本次超过当前最高分且非首次有效猜测
+  const isNewHigh = guesses.length > 0 && r.score > maxScore;
+  if (r.score > maxScore) maxScore = r.score;
+  scoreEl.innerHTML = `${r.score.toFixed(2)} 分${isNewHigh ? '<span class="new-high">↑ 新高</span>' : ''}`;
+  // 距离感文案（按分数区间）
+  hintEl.textContent = scoreHintText(r.score);
+  // 历史记录：去重 + 按相关度降序渲染（标猜测序号）
+  if (!guesses.find(g => g.word === word)) {
+    orderCounter++;
+    guesses.push({word, score: r.score, order: orderCounter});
+    renderHistory();
+  } else {
+    document.getElementById('status').textContent = `「${word}」已猜过`;
+  }
+  document.getElementById('word').value = '';
+  document.getElementById('word').focus();
+  if (r.won) {
+    document.getElementById('status').textContent = '🎉 猜中了！2 秒后开新局';
+    setTimeout(newGame, 2000);
+  }
+}
+
+// 分数→距离感文案（按分数区间，给玩家语义化反馈）
+function scoreHintText(score) {
+  if (score >= 100) return '🎉 猜中了！';
+  if (score >= 90) return '🔥 极度接近';
+  if (score >= 75) return '非常接近';
+  if (score >= 55) return '比较接近';
+  if (score >= 35) return '有点关联';
+  if (score >= 15) return '相差较远';
+  return '几乎无关';
+}
+
+// 提示：POST /hint
+async function hint(level) {
+  if (!gameId) return;
+  const btn = document.getElementById('hint' + level);
+  if (btn && btn.disabled) return;  // 每局每级只可点一次
+  const r = await fetch('/hint', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({gameId, level})
+  }).then(r => r.json());
+  const d = document.createElement('div');
+  d.className = 'hint';
+  d.textContent = `提示${level}：${r.hint}`;
+  document.getElementById('hints').appendChild(d);
+  if (btn) btn.disabled = true;  // 点击后变暗禁用
+}
+
+// 提问裁判：输入问题 POST /hint level=3，每局一次
+async function askJudge() {
+  if (!gameId) return;
+  const btn = document.getElementById('hint3');
+  if (btn && btn.disabled) return;  // 每局一次，已提问过
+  const qInput = document.getElementById('question');
+  const q = qInput.value.trim();
+  if (!q) { document.getElementById('status').textContent = '请输入问题'; return; }
+  const r = await fetch('/hint', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({gameId, level: 3, question: q})
+  }).then(r => r.json());
+  const d = document.createElement('div');
+  d.className = 'hint';
+  d.textContent = `Q: ${q} / A: ${r.answer}`;
+  document.getElementById('hints').appendChild(d);
+  if (r.used) {  // 提问成功：禁用输入框和按钮（每局一次）
+    if (btn) btn.disabled = true;
+    if (qInput) qInput.disabled = true;
+  }
+}
+
+// 渲染猜测历史：按分数降序，标猜测序号
+function renderHistory() {
+  const list = document.getElementById('history');
+  const sorted = [...guesses].sort((a, b) => b.score - a.score);
+  list.innerHTML = '<div class="history-title">猜测历史（按相关度降序）</div>';
+  sorted.forEach(g => {
+    const item = document.createElement('div');
+    const isBest = g.score === maxScore;
+    item.className = isBest ? 'guess-item best' : 'guess-item';
+    item.innerHTML = `<span>#${g.order} ${g.word}${isBest ? ' ⭐最高' : ''}</span><span>${g.score.toFixed(2)} 分</span>`;
+    item.style.background = `hsla(${(100 - g.score) * 2.4}, 70%, 50%, 0.15)`;
+    list.appendChild(item);
+  });
+}
+
+// 调试用：查看答案
+async function reveal() {
+  if (!gameId) return;
+  const r = await fetch('/answer?gameId=' + gameId).then(r => r.json());
+  if (r.target) {
+    document.getElementById('status').textContent = `（调试）目标词：${r.target}`;
+  }
+}
+
+// 回车提交
+document.getElementById('word').addEventListener('keydown', e => { if (e.key === 'Enter') guess(); });
+document.getElementById('question').addEventListener('keydown', e => { if (e.key === 'Enter') askJudge(); });
+
+newGame();
+</script>
+</body>
+</html>

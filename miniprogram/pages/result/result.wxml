@@ -1,18 +1,18 @@
 <!--pages/result/result.wxml-->
 <!-- 轻松像素涂鸦风格结算庆祝页 -->
 
-<view class="page result-page">
+<view class="page result-page" style="--safe-top:{{safeTop}}px">
   <!-- 顶部庆祝装饰 -->
-  <view class="confetti">✦ ◆ ✦ ● ✦</view>
+  <view class="confetti">✦ ◆ ✦ ◆ ✦</view>
 
   <!-- 庆祝标题 -->
   <view class="result-title">🎉 猜中啦！</view>
-  <view class="result-sub">你离答案越来越近，太棒了！</view>
 
-  <!-- 目标词卡片（每个字独立彩色卡片） -->
+  <!-- 目标词卡片：逐字渲染，4 色循环（支持任意字数目标词） -->
   <view class="word-cards">
-    <view class="word-card word-card-1">苹</view>
-    <view class="word-card word-card-2">果</view>
+    <view class="word-card word-card-{{(index % 4) + 1}}"
+          wx:for="{{targetChars}}" wx:key="*this"
+          style="animation-delay: {{index * 0.06}}s">{{item}}</view>
   </view>
 
   <!-- 中央成绩卡片 -->
@@ -22,53 +22,40 @@
     <!-- 四宫格数据 -->
     <view class="result-grid">
       <view class="metric">
-        <text class="metric-num pixel" style="color:#FFB347">{{guessCount}}</text>
+        <text class="metric-num pixel" style="color:var(--color-primary)">{{guessCount}}</text>
         <text class="metric-label">次猜测</text>
       </view>
       <view class="metric">
-        <text class="metric-num pixel" style="color:#A8E6A3">{{maxScore}}%</text>
-        <text class="metric-label">最高分</text>
+        <text class="metric-num pixel" style="color:var(--color-green-deep)">{{maxScoreDisplay}}%</text>
+        <text class="metric-label">最高相似度</text>
       </view>
       <view class="metric">
-        <text class="metric-num pixel" style="color:#A3C4F3">{{totalTime}}</text>
+        <text class="metric-num pixel" style="color:var(--color-blue-deep)">{{totalTime}}</text>
         <text class="metric-label">总用时</text>
       </view>
       <view class="metric">
-        <text class="metric-num pixel" style="color:#FF9EBB">{{hintUsed}}</text>
-        <text class="metric-label">提示</text>
+        <text class="metric-num pixel" style="color:var(--color-pink)">{{hintUsed}}</text>
+        <text class="metric-label">使用提示</text>
       </view>
     </view>
 
     <!-- 趣味评价 -->
     <view class="praise">{{praise}}</view>
 
-    <!-- 分数曲线图 -->
+    <!-- 分数曲线图（Canvas 替代 SVG），支持水平滚动 -->
     <view class="path">
       <view class="path-title">
-        <text>逼近路径</text>
-        <text class="path-sub">开始    猜中！</text>
+        <text style="font-weight:bold">逼近路径</text>
       </view>
-      <svg viewBox="0 0 300 100" class="score-chart">
-        <!-- 黑色粗线 -->
-        <path d="M5 86 L55 72 L112 67 L170 42 L230 34 L295 10"
-              fill="none" stroke="#3A3A3A" stroke-width="5" stroke-linecap="round"/>
-        <!-- 暖橙色细线 -->
-        <path d="M5 86 L55 72 L112 67 L170 42 L230 34 L295 10"
-              fill="none" stroke="#FFB347" stroke-width="3" stroke-linecap="round"/>
-        <!-- 数据点 -->
-        <g fill="#FFB347" stroke="#3A3A3A" stroke-width="2">
-          <circle cx="5" cy="86" r="5"/>
-          <circle cx="55" cy="72" r="5"/>
-          <circle cx="112" cy="67" r="5"/>
-          <circle cx="170" cy="42" r="5"/>
-          <circle cx="230" cy="34" r="5"/>
-          <circle cx="295" cy="10" r="5"/>
-        </g>
-      </svg>
+      <scroll-view scroll-x enable-flex class="chart-scroll">
+        <canvas type="2d" id="scoreChart" class="score-chart" style="width:{{chartWidth}}px"></canvas>
+      </scroll-view>
     </view>
   </view>
 
-  <!-- 底部操作按钮 -->
-  <button class="doodle-button result-primary" bindtap="onPlayAgain">再来一局 ▶</button>
-  <button class="return-button" bindtap="onGoHome">返回首页 🏠</button>
+  <!-- 底部操作按钮：左右并排，等宽等高 -->
+  <view class="result-actions">
+    <view class="doodle-button result-primary" bindtap="onPlayAgain">再来一局 ▶</view>
+    <view class="return-button" bindtap="onGoHome">返回首页 🏠</view>
+  </view>
 </view>

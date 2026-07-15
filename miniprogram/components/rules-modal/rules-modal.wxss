@@ -5,43 +5,69 @@
   text-align: center;
 }
 
+/* 弹窗标题（组件内补一份，确保样式在组件内生效） */
 .modal-title {
   display: block;
   text-align: center;
-  font-size: 50rpx;
+  font-size: var(--text-3xl);
   font-weight: bold;
   margin: 6rpx 0 24rpx;
 }
 
 .rules-list {
-  padding: 8rpx 8rpx;
-  margin: 28rpx 0 40rpx;
-  display: grid;
-  gap: 34rpx;
+  padding: var(--space-1);
+  margin: var(--space-4) 0 var(--space-4);
   text-align: left;
-  font-size: 30rpx;
-  line-height: 1.45;
+  font-size: var(--text-md);
+  line-height: 1.8;
 }
 
 .rule-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12rpx;
+  padding: var(--space-3) 0;
+  color: var(--color-text);
 }
 
-.rule-icon {
-  font-size: 42rpx;
-  margin-right: 12rpx;
+/* 游戏定位描述 */
+.rules-desc {
+  display: block;
+  text-align: center;
+  font-size: var(--text-md);
+  color: var(--color-text-sub);
+  margin: var(--space-3) 0 var(--space-5);
+}
+
+/* AI 幻觉警告 */
+.rules-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background: #FFF0E0;
+  border: 3rpx dashed var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+.rules-warning-icon {
+  font-size: var(--text-lg);
   flex-shrink: 0;
 }
 
-.rule-text {
-  flex: 1;
-  font-size: 30rpx;
+.rules-warning-text {
+  font-size: var(--text-md);
+  color: var(--color-orange-dark);
+  font-weight: bold;
 }
 
-.modal-ok {
-  width: 100%;
-  padding: 22rpx;
-  font-size: 38rpx;
+/* 知道了按钮：居中，缩小 */
+.rules-ok-row {
+  display: flex;
+  justify-content: center;
+}
+
+.rules-ok-btn {
+  padding: 16rpx 60rpx;
+  font-size: var(--text-lg);
+  background: var(--color-primary);
 }

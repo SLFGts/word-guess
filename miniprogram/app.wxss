@@ -25,53 +25,142 @@ page {
   --color-purple: #C9A8E8;      /* 淡紫 */
   --color-text: #3A3A3A;        /* 主文字色 */
   --color-text-sub: #8A8578;    /* 副文字色 */
+  --color-text-dim: #6D6A61;    /* 深灰文字色（rules-trigger 等页面特有副文） */
   --color-shadow: #3A3A3A;      /* 阴影色 */
+
+  /* —— 扩展色：原型用色按语义补充（迁移硬编码 hex 时引用）—— */
+  --color-green-deep: #75C875;  /* 高分绿：score-num / 胜率 */
+  --color-green-mid: #87CA87;   /* 中绿：result word-card-2 */
+  --color-mint: #D4F5D0;        /* 浅薄荷：challenge 底 / mode 普通底 */
+  --color-blue-deep: #6F9FE4;   /* 深天蓝：指标 / score 蓝 */
+  --color-link: #638CC8;        /* 链接蓝：section-link */
+  --color-orange-deep: #F49C2A; /* 深橙：result 标题 */
+  --color-orange-dark: #E38B1E; /* 暗橙：praise 文字 */
+  --color-tag: #FFCF81;         /* 标签橙：game-count-tag */
+  --color-hot: #FF9E40;         /* 高分热橙：.hot 状态 */
+  --color-danger: #AA5970;      /* 危险红：清除记录按钮 */
+  --color-bar-track: #E6E0D3;   /* 进度条轨道灰 */
+  --color-path-line: #D7CDBB;   /* 逼近路径虚线灰 */
+  --color-cream: #FFE8CC;       /* 浅奶油橙：mode 普通模式底 */
+  --color-sky: #D0E4F7;         /* 浅天蓝：mode 主题专场底 */
+  --color-disabled: #E8E0D0;    /* 禁用态底色：doodle-button--disabled */
+  --color-on-accent: #FEFBF4;   /* 强调色上的浅色文字（暖白，微偏奶油） */
+  --color-red-deep: #ff2a00;
+
+  /* —— 间距阶梯（原型 px ×2，禁止再写裸间距值）—— */
+  --space-1: 8rpx;     /* 4px  */
+  --space-2: 16rpx;    /* 8px  */
+  --space-3: 24rpx;    /* 12px */
+  --space-4: 28rpx;    /* 14px */
+  --space-5: 34rpx;    /* 17px 卡片 padding 基准 */
+  --space-6: 40rpx;    /* 20px */
+  --space-7: 56rpx;    /* 28px */
+  --space-8: 88rpx;    /* 44px 首页 padding-top */
+
+  /* —— 字号阶梯 —— */
+  --text-2xs: 16rpx;   /* 8px  */
+  --text-xs: 18rpx;    /* 9px  tag */
+  --text-sm: 22rpx;    /* 11px */
+  --text-base: 24rpx;  /* 12px desc */
+  --text-md: 28rpx;    /* 14px page 默认 */
+  --text-lg: 30rpx;    /* 15px */
+  --text-xl: 34rpx;    /* 17px */
+  --text-2xl: 40rpx;   /* 20px title */
+  --text-3xl: 50rpx;   /* 25px modal 标题 */
+  --text-4xl: 60rpx;   /* 30px icon */
+  --text-5xl: 84rpx;   /* 42px result 标题 */
+  --text-6xl: 144rpx;  /* 72px logo */
+  --text-7xl: 180rpx;
+
+  /* —— 圆角阶梯 —— */
+  --radius-xs: 10rpx;  /* 5px  tag/quit-btn */
+  --radius-sm: 16rpx;  /* 8px  score-bar-fill */
+  --radius-md: 20rpx;  /* 10px mini-bar */
+  --radius-lg: 26rpx;  /* 13px doodle-button */
+  --radius-xl: 36rpx;  /* 18px doodle-card */
+  --radius-2xl: 40rpx; /* 20px modal-card */
+
+  /* —— 涂鸦阴影阶梯（纯偏移、无模糊、硬边）—— */
+  --shadow-xs: 4rpx 4rpx 0 var(--color-shadow);   /* 2px */
+  --shadow-sm: 6rpx 6rpx 0 var(--color-shadow);   /* 3px */
+  --shadow-md: 8rpx 8rpx 0 var(--color-shadow);   /* 4px */
+  --shadow-lg: 12rpx 12rpx 0 var(--color-shadow);  /* 6px doodle-card */
+  --shadow-xl: 16rpx 16rpx 0 var(--color-shadow); /* 8px modal-card */
+
+  /* —— 边框宽度 —— */
+  --border-w: 6rpx;        /* 3px 标准 */
+  --border-w-thick: 8rpx;  /* 4px */
+
+  /* —— 行高 —— */
+  --leading-none: 1;
+  --leading-tight: 1.2;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+
+  /* —— 过渡缓动（涂鸦风弹性）—— */
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);   /* 弹性过冲：弹窗入场、进度条 */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);     /* 快速衰减：按钮按压 */
+
+  /* —— 提示按钮色（游戏页三级提示）—— */
+  --hint-t1: var(--color-blue);     /* T1 分类：天蓝 */
+  --hint-t2: var(--color-purple);   /* T2 联想：淡紫 */
+  --hint-t3: var(--color-pink);     /* T3 提问：柔粉 */
+
+  /* —— 全局安全区（app.js onLaunch 计算）—— */
+  --safe-top: 0px;       /* 顶部安全区：胶囊按钮底部 + 间距，由 app.js 写入 */
+  --safe-bottom: 0px;    /* 底部安全区：iPhone X 底部横条 */
 
   background: var(--color-bg);
   color: var(--color-text);
   font-family: "ZCOOL", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-  font-size: 28rpx;
-  line-height: 1.5;
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
 }
 
-/* 像素字体类 */
+/* 像素字体类：原型 letter-spacing:-1px → -2rpx */
 .pixel {
   font-family: "PressStart", "Courier New", monospace;
-  letter-spacing: -1rpx;
+  letter-spacing: -2rpx;
 }
 
 /* ====================================
    通用组件样式
    ==================================== */
 
-/* 涂鸦卡片 */
+/* 涂鸦卡片：原型 border:3px/radius:18px/shadow:6px → token */
 .doodle-card {
   background: var(--color-card);
-  border: 3rpx solid var(--color-border);
-  border-radius: 18rpx;
-  box-shadow: 6rpx 6rpx 0 var(--color-shadow);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
 }
 
-/* 涂鸦按钮 */
+/* 涂鸦按钮：原型无默认背景，由具体页面设色 */
 .doodle-button {
-  border: 3rpx solid var(--color-border);
-  border-radius: 13rpx;
-  box-shadow: 4rpx 4rpx 0 var(--color-shadow);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   color: var(--color-text);
   font-weight: 800;
-  background: var(--color-primary);
+  background: transparent;
   text-align: center;
   transition: transform 0.12s, box-shadow 0.12s;
 }
 
 .doodle-button:active {
-  transform: translate(2rpx, 2rpx);
-  box-shadow: 2rpx 2rpx 0 var(--color-shadow);
+  transform: translate(4rpx, 4rpx);
+  box-shadow: var(--shadow-xs);
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);   /* ease-out-quint：按下瞬间快速归位 */
 }
 
 .doodle-button--disabled {
   opacity: 0.4;
-  background: #E8E0D0;
+  background: var(--color-disabled) !important;
+}
+
+/* 清除微信 button 默认 ::after 伪元素边框（全局，原型无此边框，避免与自定义 border 叠加） */
+button::after {
+  display: none;
 }
 
 /* 导航栏 */
@@ -79,12 +168,13 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72rpx;
-  margin-bottom: 24rpx;
-  font-size: 34rpx;
+  height: 72rpx;  /* 36px */
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xl);
 }
 
 .nav-back {
+  margin: 0;
   background: transparent;
   border: 0;
   font-size: 48rpx;
@@ -92,6 +182,9 @@ page {
   line-height: 1;
   color: var(--color-text);
   padding: 0 10rpx;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }
 
 /* 装饰星星 */
@@ -102,14 +195,13 @@ page {
   animation: twirl 3s linear infinite;
 }
 
-/* 波浪线 */
+/* 波浪线：原型无基础 margin，由页面级覆盖 */
 .wave {
   color: var(--color-pink);
   letter-spacing: -8rpx;
-  font-size: 40rpx;
+  font-size: var(--text-2xl);
   overflow: hidden;
   white-space: nowrap;
-  margin: 40rpx 0;
 }
 
 /* ====================================
@@ -127,7 +219,9 @@ page {
   align-items: center;
   justify-content: center;
   padding: 44rpx;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8rpx);
+  -webkit-backdrop-filter: blur(8rpx);
   animation: fade 0.2s ease;
 }
 
@@ -136,9 +230,9 @@ page {
   max-width: 720rpx;
   padding: 54rpx 44rpx 46rpx;
   background: var(--color-card);
-  border: 3rpx solid var(--color-border);
-  border-radius: 40rpx;
-  box-shadow: 16rpx 16rpx 0 var(--color-shadow);
+  border: var(--border-w) solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
   animation: modal-up 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -150,6 +244,23 @@ page {
   font-size: 54rpx;
   line-height: 36rpx;
   padding: 0;
+}
+
+/* 弹窗确认按钮：原型 width:100%; background:#ffb347; padding:11px; font-size:19px */
+.modal-ok {
+  width: 100%;
+  padding: 22rpx;    /* 原型 11px ×2 */
+  background: var(--color-primary);
+  font-size: 38rpx;   /* 原型 19px ×2，token 阶梯无 38rpx，保留 */
+}
+
+/* 弹窗标题：原型 h2 { text-align:center; margin:3px 0 12px; font-size:25px } */
+.modal-card text.modal-title {
+  display: block;
+  text-align: center;
+  font-size: var(--text-3xl);
+  font-weight: bold;
+  margin: 6rpx 0 24rpx;
 }
 
 /* ====================================
@@ -189,6 +300,18 @@ page {
   100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
+/* 弹跳：加载图标上下浮动 */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16rpx); }
+}
+
+/* 闪烁呼吸：庆祝彩带 */
+@keyframes shimmer {
+  0%, 100% { opacity: 1; letter-spacing: 16rpx; }
+  50% { opacity: 0.6; letter-spacing: 28rpx; }
+}
+
 /* ====================================
    页面容器
    ==================================== */
@@ -196,7 +319,7 @@ page {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding: 44rpx 40rpx 64rpx;
+  padding: 44rpx 40rpx calc(64rpx + var(--safe-bottom));
   animation: page-in 0.35s ease both;
   position: relative;
   overflow: hidden;
