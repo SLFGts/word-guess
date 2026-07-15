@@ -64,12 +64,12 @@
     <scroll-view class="guess-list" scroll-y enhanced enable-flex wx:if="{{guesses.length > 0}}">
       <view class="guess-item"
             wx:for="{{top3Guesses}}" wx:key="word"
-            style="animation-delay: {{index * 0.05}}s">
+            style="animation-delay: {{(index || 0) * 0.05}}s">
         <text class="guess-word pixel">{{item.word}}</text>
         <view class="guess-bar-track">
-          <view class="guess-bar-fill" style="width:{{item.score}}%;background:{{item.barColor}};"></view>
+          <view class="guess-bar-fill" style="width:{{item.score || 0}}%;background:{{item.barColor || '#FFB347'}};"></view>
         </view>
-        <text class="guess-score pixel" style="color:{{item.barColor}};">{{item.scoreDisplay}}%</text>
+        <text class="guess-score pixel" style="color:{{item.barColor || '#FFB347'}};">{{item.scoreDisplay || '0.00'}}%</text>
       </view>
     </scroll-view>
 
@@ -138,13 +138,13 @@
       <text class="history-modal-close" bindtap="onCloseHistory">✕</text>
     </view>
     <scroll-view class="history-modal-list" scroll-y enhanced>
-      <view class="history-row" wx:for="{{sortedGuesses}}" wx:key="word" style="animation-delay: {{index * 0.03}}s">
+      <view class="history-row" wx:for="{{sortedGuesses}}" wx:key="word" style="animation-delay: {{(index || 0) * 0.03}}s">
         <text class="history-rank pixel">#{{index + 1}}</text>
         <text class="history-rword pixel">{{item.word}}</text>
         <view class="history-bar-track">
-          <view class="history-bar-fill" style="width:{{item.score}}%;background:{{item.barColor}};"></view>
+          <view class="history-bar-fill" style="width:{{item.score || 0}}%;background:{{item.barColor || '#FFB347'}};"></view>
         </view>
-        <text class="history-rscore pixel" style="color:{{item.barColor}};">{{item.scoreDisplay}}%</text>
+        <text class="history-rscore pixel" style="color:{{item.barColor || '#FFB347'}};">{{item.scoreDisplay || '0.00'}}%</text>
       </view>
     </scroll-view>
   </view>
