@@ -24,6 +24,13 @@ App({
   },
 
   onLaunch() {
+    // 初始化云开发
+    if (!wx.cloud) {
+      console.error('请使用基础库 2.2.3 或以上以支持云开发');
+      return;
+    }
+    wx.cloud.init({ env: 'cloud1-d3gr2aofwe81463b1', traceUser: true });
+
     // 获取系统信息，计算全局安全区
     try {
       const info = wx.getSystemInfoSync();
@@ -38,13 +45,6 @@ App({
       // 底部安全区：iPhone X 系列有底部横条
       this.globalData.safeBottom = info.safeAreaInsets ? info.safeAreaInsets.bottom : 0;
     } catch (e) { /* 取不到时用默认值 */ }
-
-    // 初始化云开发
-    if (!wx.cloud) {
-      console.error('请使用基础库 2.2.3 或以上以支持云开发');
-      return;
-    }
-    wx.cloud.init({ env: 'cloud1-d3gr2aofwe81463b1', traceUser: true });
 
     // 全局预加载所有自定义字体（启动时加载，后续页面直接使用）
     this._loadFont('ZCOOL', 'https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2');
