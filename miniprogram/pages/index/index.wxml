@@ -25,7 +25,7 @@
 
   <!-- 刺猬舞台：刺猬主体放大 + 呼吸跳动动效（去草地、去问号气泡） -->
   <view class="hedgehog-stage">
-    <image class="hedgehog-img hedgehog-bounce" src="https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/images/hedgehog.png" mode="aspectFit" />
+    <image class="hedgehog-img hedgehog-bounce" src="https://fenger-bucket.oss-cn-beijing.aliyuncs.com/word_guess/images/hedgehog.png" mode="aspectFit" />
   </view>
 
   <!-- 开始游戏主按钮（纯 bindtap 用 view，坑 4.9；引导语融入按钮内部） -->

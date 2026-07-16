@@ -227,6 +227,7 @@
 .guess-word {
   font-size: var(--text-lg);
   font-weight: bold;
+  font-family: "ZCOOL", "PingFang SC", sans-serif;
   min-width: 80rpx;
   flex-shrink: 0;
   margin-right: var(--space-3);
@@ -329,6 +330,7 @@
 .history-rword {
   font-size: var(--text-lg);
   font-weight: bold;
+  font-family: "ZCOOL", "PingFang SC", sans-serif;
   min-width: 80rpx;
   flex-shrink: 0;
 }

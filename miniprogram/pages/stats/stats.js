@@ -90,11 +90,13 @@ Page({
     if (!game || !game._raw) return;
 
     const raw = game._raw;
-    // 从 scoreHistory 重建猜测记录列表（包含分数）
+    // 从 scoreHistory 重建猜测记录列表（包含词和分数），按时间倒序：最近一次在最上方
     const guessRecords = (raw.scoreHistory || []).map((item, i) => ({
-      order: i + 1,
-      score: item.score || 0
-    }));
+      word: item.word || '',
+      order: item.order || (i + 1),
+      score: item.score || 0,
+      scoreDisplay: item.scoreDisplay || (item.score || 0).toFixed(2)
+    })).reverse();
 
     this.setData({
       detailOpen: true,

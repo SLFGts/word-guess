@@ -240,6 +240,51 @@ word_guess/
 
 ---
 
+## 用户身份与数据持久化方案（待规划，P1 前置）
+
+> **现状（P0）**：完全没有用户身份系统。云函数（newGame/guess/getHint/getAnswer）里没有任何 `cloud.getWXContext()` 调用，前端无登录逻辑。所有战绩通过 `wx.setStorageSync('gameHistory'/'gameStats')` 存在本地缓存，仅靠小程序+微信账号+设备的隐式隔离。
+
+### 存在的问题
+
+1. **换设备丢失**：用户换手机、重装微信、清缓存后战绩清零，无法找回
+2. **无法跨设备同步**：iPad 和 iPhone 上的记录各自独立
+3. **数据上限 50 条**：`game.js` 中 `history.slice(0, 50)` 截断，老记录永久丢失
+4. **无法做社交/排行榜**：后端无用户体系，P1 的"好友排行榜"、P2 的"个人数据看板"都无从落地
+5. **多设备并发写覆盖**：同一账号两端同时玩，最后同步的那端会覆盖另一端的本地记录
+
+### 规划方案（待评审细化）
+
+**核心**：引入 openid 作为用户唯一键，战绩从本地存储迁移到云数据库。
+
+| 项 | 方案 |
+|---|---|
+| 用户标识 | 云函数内 `cloud.getWXContext().OPENID`（微信自动注入，无需前端登录交互） |
+| 存储 | 云数据库 `game_history` 集合，文档字段含 `_openid`（云开发自动注入）、`targetWord`/`won`/`guessCount`/`scoreHistory`/`hints`/`date` 等 |
+| 聚合统计 | 单独 `user_stats` 集合按 `_openid` upsert，或由 `game_history` 聚合查询实时算 |
+| 读取时机 | 进入 stats 页时调云函数拉取最近 N 条；本地保留缓存作离线兜底 |
+| 写入时机 | 每局结束时（game.js `_saveGameResult`）调云函数 upsert，替代 `wx.setStorageSync` |
+| 历史数据迁移 | 首次登录云函数时，把本地 `gameHistory` 上传一次合并到云数据库（按 `_openid` + `date` 去重） |
+
+### 待决策点（需进一步评估）
+
+- **是否保留本地缓存作离线读**：无网络时 stats 页能否看历史？建议保留最近 N 条本地缓存兜底
+- **拉取条数上限**：云数据库单次查询限 100 条，stats 页展示多少、是否分页
+- **数据安全规则**：`game_history` 集合权限设为"仅创建者可读写"（云开发默认按 `_openid` 隔离，无需手写鉴权）
+- **冷启动延迟**：stats 页首次拉取云数据库的加载体验，是否做 loading 态
+- **与 P1 多人对战的衔接**：openid 体系是 P1 房间/排行榜的前置依赖，需保证 P1 启动前此改造完成
+- **50 条上限是否放开**：迁移到云数据库后可保留全部历史，但前端展示和聚合性能需评估
+
+### 改造影响范围（预估）
+
+- 云函数：新增 `getUserHistory` / `saveGameResult` 两个；`newGame` 可选注入 `_openid` 关联对局
+- 前端：`game.js` 的 `_saveGameResult` 改调云函数；`stats.js` 的 `loadStats` 改调云函数拉取
+- 数据库：新建 `game_history` / `user_stats` 两个集合
+- 兼容：保留 `wx.getStorageSync` 作离线兜底，平滑过渡
+
+> **结论**：此为 P1 多人社交/排行榜的前置基础，建议在 P0 MVP 验证通过、进入 P1 前优先实施。具体实施时再细化接口与字段设计。
+
+---
+
 ## 六、关键技术难点与应对
 
 | 难点 | 应对 |

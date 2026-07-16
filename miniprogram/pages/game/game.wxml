@@ -65,7 +65,7 @@
       <view class="guess-item"
             wx:for="{{top3Guesses}}" wx:key="word"
             style="animation-delay: {{(index || 0) * 0.05}}s">
-        <text class="guess-word pixel">{{item.word}}</text>
+        <text class="guess-word">{{item.word}}</text>
         <view class="guess-bar-track">
           <view class="guess-bar-fill" style="width:{{item.score || 0}}%;background:{{item.barColor || '#FFB347'}};"></view>
         </view>
@@ -139,8 +139,8 @@
     </view>
     <scroll-view class="history-modal-list" scroll-y enhanced>
       <view class="history-row" wx:for="{{sortedGuesses}}" wx:key="word" style="animation-delay: {{(index || 0) * 0.03}}s">
-        <text class="history-rank pixel">#{{index + 1}}</text>
-        <text class="history-rword pixel">{{item.word}}</text>
+        <text class="history-rank pixel">#{{item.order}}</text>
+        <text class="history-rword">{{item.word}}</text>
         <view class="history-bar-track">
           <view class="history-bar-fill" style="width:{{item.score || 0}}%;background:{{item.barColor || '#FFB347'}};"></view>
         </view>

@@ -123,10 +123,11 @@
       <view class="detail-guess-list">
         <view class="detail-guess-item" wx:for="{{detailGame.guessRecords}}" wx:key="order">
           <text class="detail-guess-order">#{{item.order}}</text>
+          <text class="detail-guess-word">{{item.word}}</text>
           <view class="detail-guess-bar-track">
             <view class="detail-guess-bar-fill" style="width:{{item.score || 0}}%;"></view>
           </view>
-          <text class="detail-guess-score">{{item.score || 0}}%</text>
+          <text class="detail-guess-score">{{item.scoreDisplay || '0.00'}}%</text>
         </view>
       </view>
     </view>

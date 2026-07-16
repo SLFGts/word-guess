@@ -404,6 +404,17 @@
   flex-shrink: 0;
 }
 
+.detail-guess-word {
+  font-size: var(--text-md);
+  font-weight: bold;
+  min-width: 120rpx;
+  max-width: 220rpx;
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .detail-guess-bar-track {
   flex: 1;
   height: 18rpx;

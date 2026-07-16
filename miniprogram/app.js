@@ -47,7 +47,7 @@ App({
     } catch (e) { /* 取不到时用默认值 */ }
 
     // 全局预加载所有自定义字体（启动时加载，后续页面直接使用）
-    this._loadFont('ZCOOL', 'https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2');
-    this._loadFont('PressStart', 'https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/PressStart2P-Regular.woff2');
+    this._loadFont('ZCOOL', 'https://fenger-bucket.oss-cn-beijing.aliyuncs.com/word_guess/fonts/ZCOOLKuaiLe-Regular.woff2');
+    this._loadFont('PressStart', 'https://fenger-bucket.oss-cn-beijing.aliyuncs.com/word_guess/fonts/PressStart2P-Regular.woff2');
   }
 });

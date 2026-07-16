@@ -593,7 +593,7 @@ Page({
     if (app.globalData.fontsLoaded && app.globalData.fontsLoaded.ZCOOL) return;
     wx.loadFontFace({
       family: 'ZCOOL',
-      source: 'url("https://cdn.jsdelivr.net/gh/SLFGts/word-guess@main/miniprogram/assets/fonts/ZCOOLKuaiLe-Regular.woff2")',
+      source: 'url("https://fenger-bucket.oss-cn-beijing.aliyuncs.com/word_guess/fonts/ZCOOLKuaiLe-Regular.woff2")',
       success: () => { app.globalData.fontsLoaded = app.globalData.fontsLoaded || {}; app.globalData.fontsLoaded.ZCOOL = true; },
       fail: () => { app.globalData.fontsLoaded = app.globalData.fontsLoaded || {}; app.globalData.fontsLoaded.ZCOOL = false; }
     });
