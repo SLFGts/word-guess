@@ -16,6 +16,29 @@ const db = cloud.database()
 // 云函数超时配置（Mode A 首次需下载 41MB 向量文件，Mode B 只需调 API）
 exports.config = { timeout: 60 }
 
+// 生成唯一 gameId（查重，最多重试 5 次）
+async function genUniqueGameId() {
+  for (let i = 0; i < 5; i++) {
+    const id = String(Math.floor(Math.random() * 90000) + 10000)
+    const r = await db.collection('games').where({ gameId: id }).count()
+    if (r.total === 0) return id
+  }
+  // 5 次都撞号，加时间戳兜底
+  return String(Date.now()).slice(-8)
+}
+
+// 清理 7 天前的过期局记录（每次开局顺手清理，避免数据库无限增长）
+async function cleanExpiredGames() {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    await db.collection('games').where({
+      createdAt: db.command.lt(sevenDaysAgo)
+    }).remove()
+  } catch (e) {
+    console.warn('清理过期记录失败（不影响开局）:', e.message)
+  }
+}
+
 // ===== 词池与 blocklist =====
 // blocklist：禁用词不作出题目标词
 const blocklist = new Set()
@@ -240,6 +263,9 @@ async function newGameVector(event) {
   const mode = event.mode || 'normal'
   console.log(`Mode A (vector)：${mode}`)
 
+  // 顺手清理 7 天前的过期局记录
+  await cleanExpiredGames()
+
   const candidates = sampleCandidates(5)
   const pick = await smartPick(candidates)
   let target, preT1, preT2, preT3
@@ -258,7 +284,7 @@ async function newGameVector(event) {
 
   const rankings = computeRankings(target)
 
-  const gameId = String(Math.floor(Math.random() * 90000) + 10000)
+  const gameId = await genUniqueGameId()
   await db.collection('games').add({
     data: {
       gameId,
@@ -283,6 +309,9 @@ async function newGameVector(event) {
 async function newGameEmbedding(event) {
   const mode = event.mode || 'normal'
   console.log(`Mode B (embedding)：${mode}`)
+
+  // 顺手清理 7 天前的过期局记录
+  await cleanExpiredGames()
 
   // === 智能选词：与 Mode A 共用 sampleCandidates + smartPick ===
   const candidates = sampleCandidates(5)
@@ -313,7 +342,7 @@ async function newGameEmbedding(event) {
     targetVec = null
   }
 
-  const gameId = String(Math.floor(Math.random() * 90000) + 10000)
+  const gameId = await genUniqueGameId()
   await db.collection('games').add({
     data: {
       gameId,
