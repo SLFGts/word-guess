@@ -9,10 +9,9 @@ exports.main = async (event, context) => {
   const { gameId } = event
   if (!gameId) return { error: 'invalid gameId' }
 
-  const { data } = await db.collection('games').where({ gameId }).get()
-  if (!data.length) return { error: 'game not found' }
-
-  const game = data[0]
+  const result = await db.collection('games').doc(gameId).get().catch(() => null)
+  if (!result) return { error: 'game not found' }
+  const game = result.data
   return {
     target: game.target,
     similarityMode: game.similarityMode || 'vector'

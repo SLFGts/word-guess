@@ -135,17 +135,16 @@ async function genQa(target, category, range, feature, question) {
   } catch (e) { return `(LLM调用失败: ${e.message})` }
 }
 
-// 更新 game 文档指定字段（缓存生成结果，每局每级只生成一次）
 async function updateGame(gameId, patch) {
-  await db.collection('games').where({ gameId }).update({ data: patch })
+  await db.collection('games').doc(gameId).update({ data: patch })
 }
 
 exports.main = async (event, context) => {
   const { gameId, level, question } = event
   if (!gameId) return { error: 'invalid gameId' }
-  const { data } = await db.collection('games').where({ gameId }).get()
-  if (!data.length) return { error: 'invalid gameId' }
-  const game = data[0]
+  const result = await db.collection('games').doc(gameId).get().catch(() => null)
+  if (!result) return { error: 'invalid gameId' }
+  const game = result.data
   const target = game.target
   const lvl = Number(level)  // 前端传的是字符串，统一转数字
 

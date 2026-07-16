@@ -102,11 +102,9 @@ exports.main = async (event, context) => {
   const wordTrim = (word || '').trim()
   if (!wordTrim) return { error: 'empty word' }
 
-  // 查 game 状态
-  const { data } = await db.collection('games').where({ gameId }).get()
-  if (!data.length) return { error: 'invalid gameId' }
-
-  const game = data[0]
+  const result = await db.collection('games').doc(gameId).get().catch(() => null)
+  if (!result) return { error: 'invalid gameId' }
+  const game = result.data
 
   // 根据 similarityMode 字段自动识别模式
   const mode = game.similarityMode || 'vector'

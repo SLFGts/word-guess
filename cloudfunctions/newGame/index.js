@@ -16,17 +16,6 @@ const db = cloud.database()
 // 云函数超时配置（Mode A 首次需下载 41MB 向量文件，Mode B 只需调 API）
 exports.config = { timeout: 60 }
 
-// 生成唯一 gameId（查重，最多重试 5 次）
-async function genUniqueGameId() {
-  for (let i = 0; i < 5; i++) {
-    const id = String(Math.floor(Math.random() * 90000) + 10000)
-    const r = await db.collection('games').where({ gameId: id }).count()
-    if (r.total === 0) return id
-  }
-  // 5 次都撞号，加时间戳兜底
-  return String(Date.now()).slice(-8)
-}
-
 // 清理 7 天前的过期局记录（每次开局顺手清理，避免数据库无限增长）
 async function cleanExpiredGames() {
   try {
@@ -284,21 +273,20 @@ async function newGameVector(event) {
 
   const rankings = computeRankings(target)
 
-  const gameId = await genUniqueGameId()
-  await db.collection('games').add({
+  const addResult = await db.collection('games').add({
     data: {
-      gameId,
       target,
       rankings,
-      t1: preT1,          // 类别（直接展示）
-      t2: preT2,          // 范围（按钮1）
-      t3: preT3,          // 特征（按钮2）
-      qa: null,            // 问答（按钮3，实时生成）
+      t1: preT1,
+      t2: preT2,
+      t3: preT3,
+      qa: null,
       mode,
       similarityMode: 'vector',
       createdAt: db.serverDate()
     }
   })
+  const gameId = addResult._id
 
   return { gameId, wordCount: _words.length, len: target.length, similarityMode: 'vector', t1: preT1 }
 }
@@ -342,21 +330,20 @@ async function newGameEmbedding(event) {
     targetVec = null
   }
 
-  const gameId = await genUniqueGameId()
-  await db.collection('games').add({
+  const addResult = await db.collection('games').add({
     data: {
-      gameId,
       target,
-      targetVec,          // 目标词向量（用于后续 1v1 点积）
-      t1: preT1,          // 类别（直接展示）
-      t2: preT2,          // 范围（按钮1）
-      t3: preT3,          // 特征（按钮2）
-      qa: null,            // 问答（按钮3，实时生成）
+      targetVec,
+      t1: preT1,
+      t2: preT2,
+      t3: preT3,
+      qa: null,
       mode,
       similarityMode: 'embedding',
       createdAt: db.serverDate()
     }
   })
+  const gameId = addResult._id
 
   return { gameId, len: target.length, similarityMode: 'embedding', wordCount: _playable.length, t1: preT1 }
 }
